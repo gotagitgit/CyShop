@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/Catalog/">
+    <Project Path="src/Catalog.API/Catalog.API.csproj" />
+    <Project Path="src/Catalog.Application/Catalog.Application.csproj" />
+    <Project Path="src/Catalog.Domain/Catalog.Domain.csproj" />
+    <Project Path="src/Catalog.Infrastructure/Catalog.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/Shared/">
+    <Project Path="src/CyShop.ServiceDefaults/CyShop.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/Utils/">
+    <Project Path="src/CyShop.AppHost/CyShop.AppHost.csproj" />
+    <Project Path="src/CyShop.DbMigrator/CyShop.DbMigrator.csproj" />
+  </Folder>
+</Solution>
