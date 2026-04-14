@@ -1,6 +1,52 @@
 @Basket.API_HostAddress = http://localhost:5167
+@keycloak_url = http://localhost:8080
 
-GET {{Basket.API_HostAddress}}/weatherforecast/
+### 1. Get token from Keycloak (run this first, copy access_token)
+POST {{keycloak_url}}/realms/eshop/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password&client_id=basket-api&username=user&password=Pass123$
+
+###
+
+@token = <paste-access_token-from-above>
+
+### Get basket (anonymous - returns empty basket)
+GET {{Basket.API_HostAddress}}/api/basket
 Accept: application/json
+
+###
+
+### Get basket (authenticated)
+GET {{Basket.API_HostAddress}}/api/basket
+Accept: application/json
+Authorization: Bearer {{token}}
+
+###
+
+### Update basket (create or replace)
+POST {{Basket.API_HostAddress}}/api/basket
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "buyerId": "",
+  "items": [
+    {
+      "id": "1",
+      "productId": 1,
+      "productName": "Sample Product",
+      "unitPrice": 19.99,
+      "quantity": 2,
+      "pictureUrl": "https://example.com/product.png"
+    }
+  ]
+}
+
+###
+
+### Delete basket
+DELETE {{Basket.API_HostAddress}}/api/basket
+Authorization: Bearer {{token}}
 
 ###

@@ -1,8 +1,21 @@
+using Basket.API.Endpoints;
+using Basket.API.Repositories;
+using CyShop.ServiceDefaults;
+using Scalar.AspNetCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
 builder.Services.AddOpenApi();
+
+// Register Redis connection via Aspire
+builder.AddRedisClient("basketcache");
+
+// Register basket repository
+builder.Services.AddScoped<IBasketRepository, RedisBasketRepository>();
+
+builder.AddDefaultAuthentication();
 
 var app = builder.Build();
 
@@ -11,8 +24,14 @@ app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapBasketEndpoints();
 
 app.Run();

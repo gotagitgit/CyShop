@@ -12,5 +12,25 @@ services:
     volumes:
       - catalogdb-data:/var/lib/postgresql/data
 
+  basketcache:
+    image: redis:8.2
+    ports:
+      - "6379:6379"
+    volumes:
+      - basketcache-data:/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2
+    command: start-dev
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    volumes:
+      - keycloak-data:/opt/keycloak/data
+
 volumes:
   catalogdb-data:
+  basketcache-data:
+  keycloak-data:
