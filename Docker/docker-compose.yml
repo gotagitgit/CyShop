@@ -1,0 +1,16 @@
+name: cyShop
+
+services:
+  catalogdb:
+    image: postgres:17.6
+    environment:
+      POSTGRES_DB: catalogdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - catalogdb-data:/var/lib/postgresql/data
+
+volumes:
+  catalogdb-data:
