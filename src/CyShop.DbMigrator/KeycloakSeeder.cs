@@ -20,7 +20,7 @@ public class KeycloakSeeder(IConfiguration configuration, ILogger<KeycloakSeeder
         var baseUrl = configuration["Keycloak:BaseUrl"] ?? "http://localhost:8080";
         var adminUser = configuration["Keycloak:AdminUser"] ?? "admin";
         var adminPassword = configuration["Keycloak:AdminPassword"] ?? "admin";
-        var realmName = configuration["Keycloak:Realm"] ?? "eshop";
+        var realmName = configuration["Keycloak:Realm"] ?? "cyshop";
 
         using var http = new HttpClient { BaseAddress = new Uri(baseUrl) };
 
@@ -115,41 +115,6 @@ public class KeycloakSeeder(IConfiguration configuration, ILogger<KeycloakSeeder
         string firstName,
         string lastName)
     {
-        // Check if user already exists
-        var searchResponse = await http.GetAsync($"/admin/realms/{realmName}/users?username={username}&exact=true");
-        searchResponse.EnsureSuccessStatusCode();
-
-        var users = await searchResponse.Content.ReadFromJsonAsync<JsonElement[]>(JsonOptions);
-        if (users is { Length: > 0 })
-        {
-            var userId = users[0].GetProperty("id").GetString()!;
-            logger.LogInformation("[Keycloak] User '{Username}' already exists in realm '{Realm}'. Ensuring account is fully set up...", username, realmName);
-
-            // Clear any required actions and ensure profile is complete
-            var update = new
-            {
-                firstName,
-                lastName,
-                emailVerified = true,
-                requiredActions = Array.Empty<string>()
-            };
-            var updateResponse = await http.PutAsJsonAsync($"/admin/realms/{realmName}/users/{userId}", update, JsonOptions);
-            updateResponse.EnsureSuccessStatusCode();
-
-            // Reset password to ensure it's not temporary
-            var resetPassword = new
-            {
-                type = "password",
-                value = password,
-                temporary = false
-            };
-            var pwResponse = await http.PutAsJsonAsync($"/admin/realms/{realmName}/users/{userId}/reset-password", resetPassword, JsonOptions);
-            pwResponse.EnsureSuccessStatusCode();
-
-            logger.LogInformation("[Keycloak] User '{Username}' updated in realm '{Realm}'.", username, realmName);
-            return;
-        }
-
         var user = new
         {
             username,
