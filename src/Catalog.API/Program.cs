@@ -3,6 +3,7 @@ using Catalog.Application;
 using Catalog.Infrastructure;
 using Catalog.Infrastructure.Data;
 using Scalar.AspNetCore;
+using CyShop.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
