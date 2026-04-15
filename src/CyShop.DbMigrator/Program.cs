@@ -14,6 +14,7 @@ services.AddSingleton<IConfiguration>(configuration);
 services.AddLogging(b => b.AddConsole());
 services.AddInfrastructureServices(configuration);
 services.AddScoped<MigrationRunner>();
+services.AddScoped<KeycloakSeeder>();
 
 // Future: services.AddOrdersInfrastructureServices(configuration);
 

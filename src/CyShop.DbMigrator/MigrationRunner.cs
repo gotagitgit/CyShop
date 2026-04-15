@@ -8,6 +8,7 @@ namespace CyShop.DbMigrator;
 public class MigrationRunner(
     CatalogDbContext catalogContext,
     DataSeeder catalogSeeder,
+    KeycloakSeeder keycloakSeeder,
     IConfiguration configuration,
     ILogger<MigrationRunner> logger)
 {
@@ -16,10 +17,23 @@ public class MigrationRunner(
         logger.LogInformation("Starting database migrations and seeding...");
 
         await MigrateCatalogAsync();
+        await SeedKeycloakAsync();
 
         // Future: await MigrateOrdersAsync();
 
         logger.LogInformation("All migrations and seeding completed.");
+    }
+
+    private async Task SeedKeycloakAsync()
+    {
+        try
+        {
+            await keycloakSeeder.SeedAsync();
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "[Keycloak] Seeding failed — Keycloak may not be running. Skipping.");
+        }
     }
 
     private async Task MigrateCatalogAsync()
