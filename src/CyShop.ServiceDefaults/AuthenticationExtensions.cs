@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -22,7 +23,8 @@ public static class AuthenticationExtensions
         // prevent from mapping "sub" claim to nameidentifier.
         JsonWebTokenHandler.DefaultInboundClaimTypeMap.Remove("sub");
 
-        services.AddAuthentication().AddJwtBearer(options =>
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
         {
             var identityUrl = identitySection["Url"] ?? throw new InvalidOperationException("Identity:Url is required");
             var audience = identitySection["Audience"] ?? throw new InvalidOperationException("Identity:Audience is required");

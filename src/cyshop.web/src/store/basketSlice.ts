@@ -88,7 +88,7 @@ const basketSlice = createSlice({
         state.basket.items.push(action.payload);
       }
     },
-    removeItem(state, action: PayloadAction<number>) {
+    removeItem(state, action: PayloadAction<string>) {
       if (!state.basket) return;
       state.basket.items = state.basket.items.filter(
         (i) => i.productId !== action.payload,
@@ -96,7 +96,7 @@ const basketSlice = createSlice({
     },
     updateItemQuantity(
       state,
-      action: PayloadAction<{ productId: number; quantity: number }>,
+      action: PayloadAction<{ productId: string; quantity: number }>,
     ) {
       if (!state.basket) return;
       const item = state.basket.items.find(
