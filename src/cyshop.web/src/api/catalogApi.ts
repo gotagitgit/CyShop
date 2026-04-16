@@ -20,5 +20,5 @@ export function fetchCatalogItemsByBrand(brandId: string): Promise<CatalogItemDt
 }
 
 export function getCatalogImageUrl(id: string): string {
-  return `${BASE}/${id}/pic`;
+  return `${BASE}/pic/${id}`;
 }

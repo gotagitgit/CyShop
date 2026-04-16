@@ -24,8 +24,9 @@ const userManager = new UserManager({
 setUserManager(userManager)
 
 function onSigninCallback(): void {
-  // Remove OIDC code/state params from the URL after login callback
-  window.history.replaceState({}, document.title, window.location.pathname)
+  // Just clean up the query params; the AuthCallbackPage component
+  // handles the React Router navigation once auth state is ready
+  window.history.replaceState({}, document.title, '/auth/callback')
 }
 
 createRoot(document.getElementById('root')!).render(

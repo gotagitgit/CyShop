@@ -1,4 +1,4 @@
-import type { UserManager } from 'oidc-client-ts';
+import type { UserManager, User } from 'oidc-client-ts';
 
 export interface ApiError {
   status: number;
@@ -9,9 +9,23 @@ export interface ApiError {
 export type HttpMethod = 'GET' | 'POST' | 'DELETE';
 
 let userManager: UserManager | null = null;
+let cachedUser: User | null = null;
 
 export function setUserManager(um: UserManager): void {
   userManager = um;
+
+  // Keep cachedUser in sync with UserManager events
+  um.events.addUserLoaded((user) => {
+    cachedUser = user;
+  });
+  um.events.addUserUnloaded(() => {
+    cachedUser = null;
+  });
+
+  // Initialize from storage
+  um.getUser().then((user) => {
+    cachedUser = user;
+  });
 }
 
 export function getUserManager(): UserManager | null {
@@ -19,9 +33,18 @@ export function getUserManager(): UserManager | null {
 }
 
 async function getAccessToken(): Promise<string | null> {
+  // First try the cached user (set by UserManager events)
+  if (cachedUser?.access_token && !cachedUser.expired) {
+    return cachedUser.access_token;
+  }
+  // Fall back to reading from storage
   if (!userManager) return null;
   const user = await userManager.getUser();
-  return user?.access_token ?? null;
+  if (user?.access_token) {
+    cachedUser = user;
+    return user.access_token;
+  }
+  return null;
 }
 
 async function renewToken(): Promise<string | null> {
@@ -47,6 +70,8 @@ export async function apiRequest<T>(
     const token = await getAccessToken();
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
+    } else {
+      console.warn('[apiClient] requireAuth=true but no access token available');
     }
   }
 

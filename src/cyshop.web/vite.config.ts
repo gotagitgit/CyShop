@@ -1,18 +1,25 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+// When running under Aspire, service URLs are injected as env vars.
+// Fall back to the default HTTP ports for standalone dev.
+const catalogTarget = process.env.services__catalog_api__https__0 ?? process.env.services__catalog_api__http__0 ?? 'http://localhost:5146'
+const basketTarget = process.env.services__basket_api__https__0 ?? process.env.services__basket_api__http__0 ?? 'https://localhost:7097'
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
       '/api/catalog': {
-        target: 'http://localhost:5146',
+        target: catalogTarget,
         changeOrigin: true,
+        secure: false, // allow self-signed certs in dev
       },
       '/api/basket': {
-        target: 'http://localhost:5167',
+        target: basketTarget,
         changeOrigin: true,
+        secure: false,
       },
     },
   },

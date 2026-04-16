@@ -65,8 +65,8 @@ describe('catalogApi', () => {
     expect(result).toEqual([mockItem]);
   });
 
-  it('getCatalogImageUrl returns /api/catalog/{id}/pic', () => {
-    expect(getCatalogImageUrl('abc-123')).toBe('/api/catalog/abc-123/pic');
-    expect(getCatalogImageUrl('xyz-789')).toBe('/api/catalog/xyz-789/pic');
+  it('getCatalogImageUrl returns /api/catalog/pic/{id}', () => {
+    expect(getCatalogImageUrl('abc-123')).toBe('/api/catalog/pic/abc-123');
+    expect(getCatalogImageUrl('xyz-789')).toBe('/api/catalog/pic/xyz-789');
   });
 });

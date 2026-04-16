@@ -1,8 +1,9 @@
 import { Link } from 'react-router';
 import type { CatalogItemDto } from '../types/catalog';
 import { getCatalogImageUrl } from '../api/catalogApi';
-import { useAppDispatch } from '../store/hooks';
-import { addItem } from '../store/basketSlice';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { addItem, saveBasket } from '../store/basketSlice';
+import { useAuthStatus } from '../auth/useAuthStatus';
 
 interface ProductCardProps {
   item: CatalogItemDto;
@@ -10,18 +11,35 @@ interface ProductCardProps {
 
 export default function ProductCard({ item }: ProductCardProps) {
   const dispatch = useAppDispatch();
+  const basket = useAppSelector((state) => state.basket.basket);
+  const { isAuthenticated, login } = useAuthStatus();
 
   const handleAddToBasket = () => {
-    dispatch(
-      addItem({
-        productId: Number(item.id),
-        productName: item.name,
-        unitPrice: item.price,
-        oldUnitPrice: item.price,
-        quantity: 1,
-        pictureUrl: getCatalogImageUrl(item.id),
-      }),
-    );
+    if (!isAuthenticated) {
+      login();
+      return;
+    }
+    const newItem = {
+      productId: item.id,
+      productName: item.name,
+      unitPrice: item.price,
+      oldUnitPrice: item.price,
+      quantity: 1,
+      pictureUrl: getCatalogImageUrl(item.id),
+    };
+    dispatch(addItem(newItem));
+
+    // Build the updated items list and persist to the API
+    const currentItems = basket?.items ?? [];
+    const existing = currentItems.find((i) => i.productId === item.id);
+    const updatedItems = existing
+      ? currentItems.map((i) =>
+          i.productId === item.id
+            ? { ...i, quantity: i.quantity + 1 }
+            : i,
+        )
+      : [...currentItems, newItem];
+    dispatch(saveBasket({ buyerId: basket?.buyerId ?? '', items: updatedItems }));
   };
 
   return (
