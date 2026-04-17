@@ -1,12 +1,21 @@
+import { useEffect } from 'react';
 import { Link, Outlet } from 'react-router';
 import { useAuthStatus } from '../auth/useAuthStatus';
-import { useAppSelector } from '../store/hooks';
+import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { fetchBasket } from '../store/basketSlice';
 
 export default function Layout() {
   const { isAuthenticated, login, logout } = useAuthStatus();
+  const dispatch = useAppDispatch();
   const itemCount = useAppSelector((state) =>
     state.basket.basket?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0,
   );
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchBasket());
+    }
+  }, [isAuthenticated, dispatch]);
 
   return (
     <>

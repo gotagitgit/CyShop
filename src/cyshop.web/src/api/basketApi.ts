@@ -4,7 +4,7 @@ import { apiRequest } from './apiClient';
 const BASE = '/api/basket';
 
 export function fetchBasket(): Promise<CustomerBasket> {
-  return apiRequest<CustomerBasket>('GET', BASE);
+  return apiRequest<CustomerBasket>('GET', BASE, { requireAuth: true });
 }
 
 export function updateBasket(basket: CustomerBasket): Promise<CustomerBasket> {

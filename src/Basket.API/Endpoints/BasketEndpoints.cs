@@ -13,17 +13,12 @@ public static class BasketEndpoints
 
         group.MapGet("/", async (ClaimsPrincipal user, IBasketRepository repository) =>
         {
-            var buyerId = user.FindFirstValue(JwtRegisteredClaimNames.Sub)
-                          ?? user.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(buyerId))
-            {
-                return Results.Ok(new CustomerBasket());
-            }
+            var buyerId = (user.FindFirstValue(JwtRegisteredClaimNames.Sub)
+                          ?? user.FindFirstValue(ClaimTypes.NameIdentifier))!;
 
             var basket = await repository.GetBasketAsync(buyerId);
             return Results.Ok(basket ?? new CustomerBasket { BuyerId = buyerId });
-        }).AllowAnonymous();
+        });
 
         group.MapPost("/", async (ClaimsPrincipal user, CustomerBasket basket, IBasketRepository repository) =>
         {
