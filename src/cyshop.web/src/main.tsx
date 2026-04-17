@@ -10,13 +10,7 @@ import { oidcConfig } from './auth/authConfig'
 import { setUserManager } from './api/apiClient'
 
 const userManager = new UserManager({
-  authority: oidcConfig.authority as string,
-  client_id: oidcConfig.client_id as string,
-  redirect_uri: oidcConfig.redirect_uri as string,
-  post_logout_redirect_uri: oidcConfig.post_logout_redirect_uri as string,
-  response_type: oidcConfig.response_type as string,
-  scope: oidcConfig.scope as string,
-  automaticSilentRenew: oidcConfig.automaticSilentRenew as boolean,
+  ...oidcConfig,
   userStore: new WebStorageStateStore({ store: window.sessionStorage }),
 })
 
