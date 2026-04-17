@@ -32,9 +32,13 @@ public static class CatalogEndpoints
             return Results.Ok(items);
         });
 
-        group.MapGet("/pic/{id:guid}", (Guid id, IWebHostEnvironment env) =>
+        group.MapGet("/pic/{id:guid}", async (Guid id, ICatalogService catalogService, IWebHostEnvironment env, CancellationToken ct) =>
         {
-            var path = Path.Combine(env.ContentRootPath, "Pics", $"{id}.webp");
+            var item = await catalogService.GetItemByIdAsync(id, ct);
+            if (item is null)
+                return Results.NotFound();
+
+            var path = Path.Combine(env.ContentRootPath, item.ImagePath);
             if (!File.Exists(path))
                 return Results.NotFound();
 
