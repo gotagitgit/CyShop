@@ -66,13 +66,11 @@ export async function apiRequest<T>(
 
   const headers: Record<string, string> = {};
 
-  if (requireAuth) {
-    const token = await getAccessToken();
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    } else {
-      console.warn('[apiClient] requireAuth=true but no access token available');
-    }
+  const token = await getAccessToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  } else if (requireAuth) {
+    console.warn('[apiClient] requireAuth=true but no access token available');
   }
 
   if (body !== undefined) {
