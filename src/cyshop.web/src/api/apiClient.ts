@@ -6,7 +6,7 @@ export interface ApiError {
   url: string;
 }
 
-export type HttpMethod = 'GET' | 'POST' | 'DELETE';
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 let userManager: UserManager | null = null;
 let cachedUser: User | null = null;
