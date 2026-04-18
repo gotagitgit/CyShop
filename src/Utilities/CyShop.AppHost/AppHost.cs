@@ -10,7 +10,7 @@ var basketApi = builder.AddProject<Projects.Basket_API>("basket-api")
        .WithReference(redis)
        .WithReference(keycloak);
 
-builder.AddViteApp("cyshop-web", "../CyShop.Web")
+builder.AddViteApp("cyshop-web", "../../CyShop.Web")
        .WithReference(catalogApi)
        .WithReference(basketApi);
 
