@@ -12,6 +12,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Basket.API\Basket.API.csproj" />
     <ProjectReference Include="..\Catalog.API\Catalog.API.csproj" />
+    <ProjectReference Include="..\Customers.API\Customers.API.csproj" />
   </ItemGroup>
 
 </Project>

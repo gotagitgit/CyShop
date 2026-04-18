@@ -14,4 +14,6 @@ builder.AddViteApp("cyshop-web", "../CyShop.Web")
        .WithReference(catalogApi)
        .WithReference(basketApi);
 
+builder.AddProject<Projects.Customers_API>("customers-api");
+
 builder.Build().Run();
