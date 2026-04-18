@@ -35,8 +35,8 @@ public class KeycloakSeeder(IConfiguration configuration, ILogger<KeycloakSeeder
         await EnsureClientAsync(http, realmName);
 
         logger.LogInformation("[Keycloak] Seeding test users...");
-        await EnsureUserAsync(http, realmName, "user", "Pass123$", "user@email.com", "Test", "User");
-        await EnsureUserAsync(http, realmName, "admin", "Pass123$", "admin@email.com", "Test", "Admin");
+        await EnsureUserAsync(http, realmName, "user", "user", "user@email.com", "Test", "User");
+        await EnsureUserAsync(http, realmName, "admin", "admin", "admin@email.com", "Test", "Admin");
 
         logger.LogInformation("[Keycloak] Seeding complete.");
     }
@@ -88,7 +88,21 @@ public class KeycloakSeeder(IConfiguration configuration, ILogger<KeycloakSeeder
         var clients = await searchResponse.Content.ReadFromJsonAsync<JsonElement[]>(JsonOptions);
         if (clients is { Length: > 0 })
         {
-            logger.LogInformation("[Keycloak] Client 'basket-api' already exists in realm '{Realm}'.", realmName);
+            logger.LogInformation("[Keycloak] Client 'basket-api' already exists in realm '{Realm}'. Updating redirect URIs...", realmName);
+
+            var clientId = clients[0].GetProperty("id").GetString()!;
+            var update = new
+            {
+                redirectUris = new[] { "*" },
+                webOrigins = new[] { "*" },
+                attributes = new Dictionary<string, string>
+                {
+                    ["post.logout.redirect.uris"] = "+"
+                }
+            };
+
+            var updateResponse = await http.PutAsJsonAsync($"/admin/realms/{realmName}/clients/{clientId}", update, JsonOptions);
+            updateResponse.EnsureSuccessStatusCode();
             return;
         }
 
@@ -98,7 +112,13 @@ public class KeycloakSeeder(IConfiguration configuration, ILogger<KeycloakSeeder
             enabled = true,
             publicClient = true,
             directAccessGrantsEnabled = true,
-            standardFlowEnabled = false
+            standardFlowEnabled = true,
+            redirectUris = new[] { "*" },
+            webOrigins = new[] { "*" },
+            attributes = new Dictionary<string, string>
+            {
+                ["post.logout.redirect.uris"] = "+"
+            }
         };
 
         var createResponse = await http.PostAsJsonAsync($"/admin/realms/{realmName}/clients", client, JsonOptions);
