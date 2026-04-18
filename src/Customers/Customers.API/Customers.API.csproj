@@ -7,9 +7,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\CyShop.ServiceDefaults\CyShop.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Customers.Application\Customers.Application.csproj" />
     <ProjectReference Include="..\Customers.Infrastructure\Customers.Infrastructure.csproj" />
-    <ProjectReference Include="..\CyShop.ServiceDefaults\CyShop.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>
