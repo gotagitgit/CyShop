@@ -4,5 +4,5 @@ namespace Customers.Application.Interfaces;
 
 public interface ICustomerAddressService
 {
-    Task<IReadOnlyList<CustomerAddressDto>> GetAddressesByEmailAsync(string email, CancellationToken ct = default);
+    Task<IReadOnlyList<CustomerAddressDto>> GetAddressesByExternalIdAsync(Guid externalId, CancellationToken ct = default);
 }

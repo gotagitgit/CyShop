@@ -8,6 +8,7 @@ internal static class CustomerMapper
     public static Customer ToDomain(CustomerDto dto) =>
         new(
             Id: dto.Id,
+            ExternalId: dto.ExternalId,
             FirstName: dto.FirstName,
             LastName: dto.LastName,
             Email: dto.Email,
@@ -32,6 +33,7 @@ internal static class CustomerMapper
         new()
         {
             Id = entity.Id,
+            ExternalId = entity.ExternalId,
             FirstName = entity.FirstName,
             LastName = entity.LastName,
             Email = entity.Email,

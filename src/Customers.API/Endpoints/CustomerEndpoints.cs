@@ -11,15 +11,14 @@ public static class CustomerEndpoints
 
         group.MapGet("/addresses", async (ClaimsPrincipal user, ICustomerAddressService addressService, CancellationToken ct) =>
         {
-            var email = user.FindFirstValue(ClaimTypes.Email)
-                        ?? user.FindFirstValue("email");
+            var sub = user.FindFirstValue("sub");
 
-            if (string.IsNullOrEmpty(email))
+            if (string.IsNullOrEmpty(sub) || !Guid.TryParse(sub, out var externalId))
             {
                 return Results.Ok(Array.Empty<object>());
             }
 
-            var addresses = await addressService.GetAddressesByEmailAsync(email, ct);
+            var addresses = await addressService.GetAddressesByExternalIdAsync(externalId, ct);
             return Results.Ok(addresses);
         });
 

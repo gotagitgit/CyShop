@@ -88,6 +88,9 @@ namespace Customers.Infrastructure.Data.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<Guid>("ExternalId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -99,6 +102,9 @@ namespace Customers.Infrastructure.Data.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ExternalId")
+                        .IsUnique();
 
                     b.ToTable("Customers", (string)null);
                 });

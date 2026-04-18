@@ -8,9 +8,9 @@ public class CustomerAddressService(
     ICustomerRepository customerRepository,
     ICustomerAddressRepository addressRepository) : ICustomerAddressService
 {
-    public async Task<IReadOnlyList<CustomerAddressDto>> GetAddressesByEmailAsync(string email, CancellationToken ct = default)
+    public async Task<IReadOnlyList<CustomerAddressDto>> GetAddressesByExternalIdAsync(Guid externalId, CancellationToken ct = default)
     {
-        var customer = await customerRepository.GetByEmailAsync(email, ct);
+        var customer = await customerRepository.GetByExternalIdAsync(externalId, ct);
         if (customer is null)
             return [];
 
