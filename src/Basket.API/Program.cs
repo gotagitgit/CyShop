@@ -17,6 +17,8 @@ builder.Services.AddScoped<IBasketRepository, RedisBasketRepository>();
 
 builder.AddDefaultAuthentication();
 
+builder.AddDefaultCors();
+
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
@@ -27,6 +29,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.UseCors();
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

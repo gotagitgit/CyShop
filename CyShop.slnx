@@ -20,4 +20,8 @@
     <Project Path="src/CyShop.AppHost/CyShop.AppHost.csproj" />
     <Project Path="src/CyShop.DbMigrator/CyShop.DbMigrator.csproj" />
   </Folder>
+  <Project Path="src/cyshop.web/cyshop.web.esproj">
+    <Build />
+    <Deploy />
+  </Project>
 </Solution>

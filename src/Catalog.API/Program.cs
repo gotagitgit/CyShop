@@ -12,6 +12,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
+builder.AddDefaultCors();
+
 var app = builder.Build();
 
 // Only auto-create and seed in development
@@ -33,6 +35,7 @@ if (app.Environment.IsDevelopment())
 }
     
 
+app.UseCors();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
