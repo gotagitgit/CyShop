@@ -8,6 +8,12 @@
     <Project Path="src/Catalog.Domain/Catalog.Domain.csproj" />
     <Project Path="src/Catalog.Infrastructure/Catalog.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/Customers/">
+    <Project Path="src/Customers.API/Customers.API.csproj" />
+    <Project Path="src/Customers.Application/Customers.Application.csproj" />
+    <Project Path="src/Customers.Domain/Customers.Domain.csproj" />
+    <Project Path="src/Customers.Infrastructure/Customers.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/Shared/">
     <Project Path="src/CyShop.ServiceDefaults/CyShop.ServiceDefaults.csproj" />
   </Folder>
