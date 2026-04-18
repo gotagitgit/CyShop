@@ -7,6 +7,8 @@ using Microsoft.Extensions.Logging;
 
 namespace CyShop.DbMigrator;
 
+public record KeycloakUser(Guid KeycloakId, string Username, string Email);
+
 public class KeycloakSeeder(IConfiguration configuration, ILogger<KeycloakSeeder> logger)
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -15,7 +17,11 @@ public class KeycloakSeeder(IConfiguration configuration, ILogger<KeycloakSeeder
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    public async Task SeedAsync()
+    /// <summary>
+    /// Seeds Keycloak realm, client, and test users.
+    /// Returns the list of seeded users with their Keycloak IDs (sub claims).
+    /// </summary>
+    public async Task<IReadOnlyList<KeycloakUser>> SeedAsync()
     {
         var baseUrl = configuration["Keycloak:BaseUrl"] ?? "http://localhost:8080";
         var adminUser = configuration["Keycloak:AdminUser"] ?? "admin";
@@ -38,7 +44,31 @@ public class KeycloakSeeder(IConfiguration configuration, ILogger<KeycloakSeeder
         await EnsureUserAsync(http, realmName, "user", "user", "user@email.com", "Test", "User");
         await EnsureUserAsync(http, realmName, "admin", "admin", "admin@email.com", "Test", "Admin");
 
+        // Retrieve Keycloak user IDs so they can be used as ExternalId in the Customers DB
+        var users = new List<KeycloakUser>();
+        foreach (var (username, email) in new[] { ("user", "user@email.com"), ("admin", "admin@email.com") })
+        {
+            var keycloakId = await GetUserIdAsync(http, realmName, username);
+            if (keycloakId is not null)
+            {
+                users.Add(new KeycloakUser(Guid.Parse(keycloakId), username, email));
+                logger.LogInformation("[Keycloak] User '{Username}' has Keycloak ID: {KeycloakId}", username, keycloakId);
+            }
+        }
+
         logger.LogInformation("[Keycloak] Seeding complete.");
+        return users;
+    }
+
+    private async Task<string?> GetUserIdAsync(HttpClient http, string realmName, string username)
+    {
+        var response = await http.GetAsync($"/admin/realms/{realmName}/users?username={username}&exact=true");
+        if (!response.IsSuccessStatusCode) return null;
+
+        var users = await response.Content.ReadFromJsonAsync<JsonElement[]>(JsonOptions);
+        if (users is not { Length: > 0 }) return null;
+
+        return users[0].GetProperty("id").GetString();
     }
 
     private static async Task<string> GetAdminTokenAsync(HttpClient http, string user, string password)
@@ -135,6 +165,17 @@ public class KeycloakSeeder(IConfiguration configuration, ILogger<KeycloakSeeder
         string firstName,
         string lastName)
     {
+        // Check if user already exists
+        var searchResponse = await http.GetAsync($"/admin/realms/{realmName}/users?username={username}&exact=true");
+        searchResponse.EnsureSuccessStatusCode();
+
+        var existingUsers = await searchResponse.Content.ReadFromJsonAsync<JsonElement[]>(JsonOptions);
+        if (existingUsers is { Length: > 0 })
+        {
+            logger.LogInformation("[Keycloak] User '{Username}' already exists in realm '{Realm}'.", username, realmName);
+            return;
+        }
+
         var user = new
         {
             username,

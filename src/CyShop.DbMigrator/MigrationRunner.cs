@@ -20,21 +20,26 @@ public class MigrationRunner(
         logger.LogInformation("Starting database migrations and seeding...");
 
         await MigrateCatalogAsync();
-        await MigrateCustomersAsync();
-        await SeedKeycloakAsync();
+
+        // Seed Keycloak first to get user IDs (sub claims)
+        var keycloakUsers = await SeedKeycloakAsync();
+
+        // Then seed Customers with the Keycloak external IDs
+        await MigrateCustomersAsync(keycloakUsers);
 
         logger.LogInformation("All migrations and seeding completed.");
     }
 
-    private async Task SeedKeycloakAsync()
+    private async Task<IReadOnlyList<KeycloakUser>> SeedKeycloakAsync()
     {
         try
         {
-            await keycloakSeeder.SeedAsync();
+            return await keycloakSeeder.SeedAsync();
         }
         catch (Exception ex)
         {
             logger.LogWarning(ex, "[Keycloak] Seeding failed — Keycloak may not be running. Skipping.");
+            return [];
         }
     }
 
@@ -51,14 +56,24 @@ public class MigrationRunner(
         logger.LogInformation("[Catalog] Seeding complete.");
     }
 
-    private async Task MigrateCustomersAsync()
+    private async Task MigrateCustomersAsync(IReadOnlyList<KeycloakUser> keycloakUsers)
     {
         logger.LogInformation("[Customers] Applying migrations...");
         await customersContext.Database.MigrateAsync();
         logger.LogInformation("[Customers] Migrations applied.");
 
+        // Map Keycloak users to seed entries with their external IDs
+        IReadOnlyList<CustomerSeedEntry>? entries = keycloakUsers.Count > 0
+            ? keycloakUsers.Select(u => u.Username switch
+            {
+                "user" => new CustomerSeedEntry(u.KeycloakId, "Test", "User", u.Email, "555-0001"),
+                "admin" => new CustomerSeedEntry(u.KeycloakId, "Test", "Admin", u.Email, "555-0002"),
+                _ => new CustomerSeedEntry(u.KeycloakId, u.Username, u.Username, u.Email, "555-0000")
+            }).ToList()
+            : null; // null = use placeholder fallback in seeder
+
         logger.LogInformation("[Customers] Seeding data...");
-        await customersSeeder.SeedAsync();
+        await customersSeeder.SeedAsync(entries);
         logger.LogInformation("[Customers] Seeding complete.");
     }
 }

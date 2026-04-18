@@ -17,6 +17,15 @@ public class CustomerRepository(CustomersDbContext context) : ICustomerRepositor
         return dto is null ? null : CustomerMapper.ToDomain(dto);
     }
 
+    public async Task<Customer?> GetByExternalIdAsync(Guid externalId, CancellationToken ct = default)
+    {
+        var dto = await context.Customers
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.ExternalId == externalId, ct);
+
+        return dto is null ? null : CustomerMapper.ToDomain(dto);
+    }
+
     public async Task<Customer?> GetByEmailAsync(string email, CancellationToken ct = default)
     {
         var dto = await context.Customers

@@ -16,6 +16,7 @@ namespace Customers.Infrastructure.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ExternalId = table.Column<Guid>(type: "uuid", nullable: false),
                     FirstName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     LastName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
@@ -56,6 +57,12 @@ namespace Customers.Infrastructure.Data.Migrations
                 name: "IX_CustomerAddresses_CustomerId",
                 table: "CustomerAddresses",
                 column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Customers_ExternalId",
+                table: "Customers",
+                column: "ExternalId",
+                unique: true);
         }
 
         /// <inheritdoc />

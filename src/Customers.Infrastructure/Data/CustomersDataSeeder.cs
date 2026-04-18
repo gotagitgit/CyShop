@@ -4,9 +4,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Customers.Infrastructure.Data;
 
+public record CustomerSeedEntry(Guid ExternalId, string FirstName, string LastName, string Email, string ContactNumber);
+
 public class CustomersDataSeeder(CustomersDbContext context, ILogger<CustomersDataSeeder> logger)
 {
-    public async Task SeedAsync(CancellationToken ct = default)
+    /// <summary>
+    /// Seeds customers with their Keycloak external IDs and addresses.
+    /// </summary>
+    public async Task SeedAsync(IReadOnlyList<CustomerSeedEntry>? entries = null, CancellationToken ct = default)
     {
         try
         {
@@ -16,87 +21,65 @@ public class CustomersDataSeeder(CustomersDbContext context, ILogger<CustomersDa
                 return;
             }
 
-            var userCustomerId = Guid.NewGuid();
-            var adminCustomerId = Guid.NewGuid();
+            // Fall back to deterministic GUIDs if Keycloak wasn't available
+            entries ??= [
+                new(Guid.NewGuid(), "Test", "User", "user@email.com", "555-0001"),
+                new(Guid.NewGuid(), "Test", "Admin", "admin@email.com", "555-0002")
+            ];
 
-            var customers = new List<CustomerDto>
+            var customerIds = new Dictionary<string, Guid>();
+
+            var customers = entries.Select(e =>
             {
-                new()
+                var id = Guid.NewGuid();
+                customerIds[e.Email] = id;
+                return new CustomerDto
                 {
-                    Id = userCustomerId,
-                    FirstName = "Test",
-                    LastName = "User",
-                    Email = "user@email.com",
-                    ContactNumber = "555-0001"
-                },
-                new()
-                {
-                    Id = adminCustomerId,
-                    FirstName = "Test",
-                    LastName = "Admin",
-                    Email = "admin@email.com",
-                    ContactNumber = "555-0002"
-                }
-            };
+                    Id = id,
+                    ExternalId = e.ExternalId,
+                    FirstName = e.FirstName,
+                    LastName = e.LastName,
+                    Email = e.Email,
+                    ContactNumber = e.ContactNumber
+                };
+            }).ToList();
 
             await context.Customers.AddRangeAsync(customers, ct);
             await context.SaveChangesAsync(ct);
 
-            var addresses = new List<CustomerAddressDto>
+            var addresses = new List<CustomerAddressDto>();
+
+            if (customerIds.TryGetValue("user@email.com", out var userId))
             {
-                new()
+                addresses.Add(new CustomerAddressDto
                 {
-                    Id = Guid.NewGuid(),
-                    CustomerId = userCustomerId,
-                    Label = "Home",
-                    Street = "123 Main St",
-                    City = "Springfield",
-                    State = "IL",
-                    Country = "US",
-                    ZipCode = "62701",
-                    IsDefault = true,
-                    CreatedDateTime = DateTime.UtcNow
-                },
-                new()
+                    Id = Guid.NewGuid(), CustomerId = userId, Label = "Home",
+                    Street = "123 Main St", City = "Springfield", State = "IL",
+                    Country = "US", ZipCode = "62701", IsDefault = true, CreatedDateTime = DateTime.UtcNow
+                });
+                addresses.Add(new CustomerAddressDto
                 {
-                    Id = Guid.NewGuid(),
-                    CustomerId = userCustomerId,
-                    Label = "Work",
-                    Street = "456 Office Blvd",
-                    City = "Springfield",
-                    State = "IL",
-                    Country = "US",
-                    ZipCode = "62702",
-                    IsDefault = false,
-                    CreatedDateTime = DateTime.UtcNow
-                },
-                new()
+                    Id = Guid.NewGuid(), CustomerId = userId, Label = "Work",
+                    Street = "456 Office Blvd", City = "Springfield", State = "IL",
+                    Country = "US", ZipCode = "62702", IsDefault = false, CreatedDateTime = DateTime.UtcNow
+                });
+            }
+
+            if (customerIds.TryGetValue("admin@email.com", out var adminId))
+            {
+                addresses.Add(new CustomerAddressDto
                 {
-                    Id = Guid.NewGuid(),
-                    CustomerId = adminCustomerId,
-                    Label = "Home",
-                    Street = "789 Admin Ave",
-                    City = "Chicago",
-                    State = "IL",
-                    Country = "US",
-                    ZipCode = "60601",
-                    IsDefault = true,
-                    CreatedDateTime = DateTime.UtcNow
-                },
-                new()
+                    Id = Guid.NewGuid(), CustomerId = adminId, Label = "Home",
+                    Street = "789 Admin Ave", City = "Chicago", State = "IL",
+                    Country = "US", ZipCode = "60601", IsDefault = true, CreatedDateTime = DateTime.UtcNow
+                });
+                addresses.Add(new CustomerAddressDto
                 {
-                    Id = Guid.NewGuid(),
-                    CustomerId = adminCustomerId,
-                    Label = "Office",
-                    Street = "321 Corporate Dr",
-                    City = "Chicago",
-                    State = "IL",
-                    Country = "US",
-                    ZipCode = "60602",
-                    IsDefault = false,
-                    CreatedDateTime = DateTime.UtcNow
-                }
-            };
+                    Id = Guid.NewGuid(), CustomerId = adminId, Label = "Office",
+                    Street = "321 Corporate Dr", City = "Chicago", State = "IL",
+                    Country = "US", ZipCode = "60602", IsDefault = false, CreatedDateTime = DateTime.UtcNow
+                });
+            }
 
             await context.CustomerAddresses.AddRangeAsync(addresses, ct);
             await context.SaveChangesAsync(ct);
