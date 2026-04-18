@@ -1,0 +1,18 @@
+﻿<Project Sdk="Aspire.AppHost.Sdk/13.0.2">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <UserSecretsId>36980b8a-0e96-4dd8-9bfd-c3abeb11e819</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.JavaScript" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Basket.API\Basket.API.csproj" />
+    <ProjectReference Include="..\..\Catalogs\Catalog.API\Catalog.API.csproj" />
+    <ProjectReference Include="..\..\Customers\Customers.API\Customers.API.csproj" />
+  </ItemGroup>
+
+</Project>
