@@ -1,4 +1,5 @@
 using Catalog.Infrastructure;
+using Customers.Infrastructure;
 using CyShop.DbMigrator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,7 @@ var services = new ServiceCollection();
 services.AddSingleton<IConfiguration>(configuration);
 services.AddLogging(b => b.AddConsole());
 services.AddInfrastructureServices(configuration);
+services.AddCustomersInfrastructureServices(configuration);
 services.AddScoped<MigrationRunner>();
 services.AddScoped<KeycloakSeeder>();
 

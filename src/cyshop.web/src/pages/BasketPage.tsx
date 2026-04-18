@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AuthGuard } from '../auth/AuthGuard';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
@@ -7,17 +7,42 @@ import {
   removeItem,
   updateItemQuantity,
 } from '../store/basketSlice';
-import { Link } from 'react-router';
+import { setSelectedItems } from '../store/checkoutSlice';
+import { Link, useNavigate } from 'react-router';
+import type { BasketItem } from '../types/basket';
 
 function BasketContent() {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { basket, status, error } = useAppSelector((state) => state.basket);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     dispatch(fetchBasket());
   }, [dispatch]);
 
-  const handleQuantityChange = (productId: number, newQuantity: number) => {
+  const handleCheckboxChange = (productId: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(productId)) {
+        next.delete(productId);
+      } else {
+        next.add(productId);
+      }
+      return next;
+    });
+  };
+
+  const handleCheckout = () => {
+    if (!basket) return;
+    const selected: BasketItem[] = basket.items.filter((item) =>
+      selectedIds.has(item.productId),
+    );
+    dispatch(setSelectedItems(selected));
+    navigate('/checkout');
+  };
+
+  const handleQuantityChange = (productId: string, newQuantity: number) => {
     if (newQuantity < 1 || !basket) return;
     dispatch(updateItemQuantity({ productId, quantity: newQuantity }));
     const updatedItems = basket.items.map((item) =>
@@ -26,7 +51,7 @@ function BasketContent() {
     dispatch(saveBasket({ ...basket, items: updatedItems }));
   };
 
-  const handleRemove = (productId: number) => {
+  const handleRemove = (productId: string) => {
     if (!basket) return;
     dispatch(removeItem(productId));
     const updatedItems = basket.items.filter(
@@ -77,6 +102,7 @@ function BasketContent() {
       <table aria-label="Basket items">
         <thead>
           <tr>
+            <th scope="col">Select</th>
             <th scope="col">Product</th>
             <th scope="col">Unit Price</th>
             <th scope="col">Quantity</th>
@@ -87,6 +113,14 @@ function BasketContent() {
         <tbody>
           {basket.items.map((item) => (
             <tr key={item.productId}>
+              <td>
+                <input
+                  type="checkbox"
+                  checked={selectedIds.has(item.productId)}
+                  onChange={() => handleCheckboxChange(item.productId)}
+                  aria-label={`Select ${item.productName}`}
+                />
+              </td>
               <td>{item.productName}</td>
               <td>${item.unitPrice.toFixed(2)}</td>
               <td>
@@ -132,7 +166,28 @@ function BasketContent() {
         <strong>Total: ${basketTotal.toFixed(2)}</strong>
       </div>
 
-      <Link to="/">Continue shopping</Link>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem' }}>
+        <Link to="/">Continue shopping</Link>
+        <button
+          type="button"
+          disabled={selectedIds.size === 0}
+          onClick={handleCheckout}
+          aria-label="Proceed to checkout"
+          style={{
+            padding: '0.6rem 1.5rem',
+            background: selectedIds.size === 0 ? '#a5b4fc' : '#4f46e5',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontWeight: 600,
+            fontSize: '0.95rem',
+            cursor: selectedIds.size === 0 ? 'not-allowed' : 'pointer',
+            transition: 'background 0.15s',
+          }}
+        >
+          Proceed to Checkout
+        </button>
+      </div>
     </div>
   );
 }

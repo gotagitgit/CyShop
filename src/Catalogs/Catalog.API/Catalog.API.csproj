@@ -6,9 +6,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\CyShop.ServiceDefaults\CyShop.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Catalog.Application\Catalog.Application.csproj" />
     <ProjectReference Include="..\Catalog.Infrastructure\Catalog.Infrastructure.csproj" />
-    <ProjectReference Include="..\CyShop.ServiceDefaults\CyShop.ServiceDefaults.csproj" />
   </ItemGroup>
 
   <ItemGroup>
