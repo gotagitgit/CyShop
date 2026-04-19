@@ -10,4 +10,6 @@ public interface ICustomerRepository
     Task<Customer> AddAsync(Customer customer, CancellationToken ct = default);
     Task<Customer> UpdateAsync(Customer customer, CancellationToken ct = default);
     Task<bool> DeleteAsync(Guid id, CancellationToken ct = default);
+    Task<Customer[]> GetAllAsync(CancellationToken ct = default);
+    Task<Customer> UpdateExternalIdAsync(Guid id, Guid externalId, CancellationToken ct = default);
 }
