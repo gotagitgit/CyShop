@@ -8,4 +8,5 @@ public interface ICatalogService
     Task<CatalogItemDto?> GetItemByIdAsync(Guid id, CancellationToken ct = default);
     Task<IReadOnlyList<CatalogItemDto>> GetItemsByTypeAsync(Guid typeId, CancellationToken ct = default);
     Task<IReadOnlyList<CatalogItemDto>> GetItemsByBrandAsync(Guid brandId, CancellationToken ct = default);
+    Task<Stream?> GetItemImageAsync(Guid id, CancellationToken ct = default);
 }

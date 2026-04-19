@@ -7,8 +7,9 @@ namespace Catalog.Infrastructure.Data;
 
 public class DataSeeder(CatalogDbContext context, ILogger<DataSeeder> logger)
 {
-    public async Task SeedAsync(string jsonPath, CancellationToken ct = default)
+    public async Task SeedAsync(CancellationToken ct = default)
     {
+        var jsonPath = Path.Combine(AppContext.BaseDirectory, "SeedData", "catalog_data", "catalog.json");
         try
         {
             if (await context.CatalogItems.AnyAsync(ct))
@@ -52,7 +53,7 @@ public class DataSeeder(CatalogDbContext context, ILogger<DataSeeder> logger)
                 Name = seed.Name,
                 Description = seed.Description,
                 Price = seed.Price,
-                ImagePath = $"Pics/{seed.Id}.webp",
+                ImagePath = $"images/{seed.Id}.webp",
                 BrandId = brandMap[seed.Brand].Id,
                 TypeId = typeMap[seed.Type].Id,
             }).ToArray();
