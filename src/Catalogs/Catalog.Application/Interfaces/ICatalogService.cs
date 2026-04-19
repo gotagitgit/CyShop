@@ -9,4 +9,7 @@ public interface ICatalogService
     Task<IReadOnlyList<CatalogItemDto>> GetItemsByTypeAsync(Guid typeId, CancellationToken ct = default);
     Task<IReadOnlyList<CatalogItemDto>> GetItemsByBrandAsync(Guid brandId, CancellationToken ct = default);
     Task<Stream?> GetItemImageAsync(Guid id, CancellationToken ct = default);
+    Task<CatalogItemDto> CreateAsync(CreateCatalogItemDto dto, CancellationToken ct = default);
+    Task<CatalogItemDto?> UpdateAsync(Guid id, UpdateCatalogItemDto dto, CancellationToken ct = default);
+    Task<bool> DeleteAsync(Guid id, CancellationToken ct = default);
 }

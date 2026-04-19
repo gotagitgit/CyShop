@@ -1,9 +1,8 @@
 using Catalog.API.Endpoints;
 using Catalog.Application;
 using Catalog.Infrastructure;
-using Catalog.Infrastructure.Data;
-using Scalar.AspNetCore;
 using CyShop.ServiceDefaults;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,17 +13,9 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 
 builder.AddDefaultCors();
 
-var app = builder.Build();
+builder.AddDefaultAuthentication();
 
-// Only auto-create and seed in development
-if (app.Environment.IsDevelopment())
-{
-    using var scope = app.Services.CreateScope();
-    var context = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
-    await context.Database.EnsureCreatedAsync();
-    var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
-    await seeder.SeedAsync();
-}
+var app = builder.Build();
 
 app.MapDefaultEndpoints();
 
@@ -37,6 +28,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors();
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapCatalogEndpoints();
 

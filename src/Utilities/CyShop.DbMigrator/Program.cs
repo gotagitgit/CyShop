@@ -23,6 +23,11 @@ services.AddScoped<MigrationRunner>();
 services.AddScoped<AuthSeeder>();
 services.AddSingleton<StorageSeeder>();
 
+services.AddTransient<ClientCredentialsDelegatingHandler>();
+services.AddHttpClient<CatalogApiSeeder>()
+    .AddHttpMessageHandler<ClientCredentialsDelegatingHandler>();
+services.AddHttpClient<CustomerApiSeeder>()
+    .AddHttpMessageHandler<ClientCredentialsDelegatingHandler>();
 
 await using var provider = services.BuildServiceProvider();
 using var scope = provider.CreateScope();

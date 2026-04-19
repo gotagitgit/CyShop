@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Auth.Infrastructure.Services;
 using Auth.Infrastructure.Dtos;
+using Auth.Infrastructure.Extensions;
 using Customers.Domain.Interfaces;
 using Customers.Domain.Entities;
 
@@ -20,6 +21,10 @@ public sealed class AuthSeeder(
         await identityProviderService.CreateRealmAsync(realmName);
 
         await identityProviderService.CreateClientAsync(realmName, "cyshop-web", cancellationToken);
+
+        var clientSecret = configuration["Keycloak:ServiceClientSecret"] ?? "service-secret";
+        var serviceClient = new CreateClientDto().CreateConfidential("cyshop-service", clientSecret);
+        await identityProviderService.CreateClientAsync(realmName, serviceClient, cancellationToken);
 
         var users = await GetCustomersAsync(cancellationToken);
 
