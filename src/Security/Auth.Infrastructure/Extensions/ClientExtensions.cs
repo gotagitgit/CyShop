@@ -23,5 +23,19 @@ public static class ClientExtensions
                 }
             };
         }
+
+        public CreateClientDto CreateConfidential(string clientId, string clientSecret)
+        {
+            return new CreateClientDto
+            {
+                ClientId = clientId,
+                Enabled = true,
+                PublicClient = false,
+                ServiceAccountsEnabled = true,
+                StandardFlowEnabled = false,
+                DirectAccessGrantsEnabled = false,
+                ClientSecret = clientSecret
+            };
+        }
     }
 }

@@ -1,55 +1,54 @@
-using Auth.Infrastructure.Services;
 using Catalog.Infrastructure.Data;
 using Customers.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace CyShop.DbMigrator;
 
 public class MigrationRunner(
     CatalogDbContext catalogContext,
-    DataSeeder catalogSeeder,
     CustomersDbContext customersContext,
-    CustomersDataSeeder customersSeeder,
     AuthSeeder authSeeder,
+    CatalogApiSeeder catalogApiSeeder,
+    CustomersDataSeeder customersSeeder,
     StorageSeeder storageSeeder,
-    IIdentityProviderService identityProviderService,
-    IConfiguration configuration,
     ILogger<MigrationRunner> logger)
 {
-    public async Task RunAllAsync()
+    public async Task RunAllAsync(CancellationToken ct = default)
     {
         logger.LogInformation("Starting database migrations and seeding...");
 
-        await MigrateCatalogAsync();
+        await MigrateCatalogAsync(ct);
 
-        await MigrateCustomersAsync();
+        await MigrateCustomersAsync(ct);
 
-        await authSeeder.SeedAsync(CancellationToken.None);
+        await SeedCustomersAsync(ct);
+
+        await authSeeder.SeedAsync(ct);
+
+        await catalogApiSeeder.SeedAsync(ct);
 
         await SeedStorageAsync();
 
         logger.LogInformation("All migrations and seeding completed.");
     }
 
-    private async Task MigrateCatalogAsync()
+    private async Task MigrateCatalogAsync(CancellationToken ct)
     {
         logger.LogInformation("[Catalog] Applying migrations...");
-        await catalogContext.Database.MigrateAsync();
+        await catalogContext.Database.MigrateAsync(ct);
         logger.LogInformation("[Catalog] Migrations applied.");
-
-        logger.LogInformation("[Catalog] Seeding data...");
-        await catalogSeeder.SeedAsync();
-        logger.LogInformation("[Catalog] Seeding complete.");
     }
 
-    private async Task MigrateCustomersAsync()
+    private async Task MigrateCustomersAsync(CancellationToken ct)
     {
         logger.LogInformation("[Customers] Applying migrations...");
-        await customersContext.Database.MigrateAsync();
+        await customersContext.Database.MigrateAsync(ct);
         logger.LogInformation("[Customers] Migrations applied.");
+    }
 
+    private async Task SeedCustomersAsync(CancellationToken ct)
+    {
         logger.LogInformation("[Customers] Seeding data...");
         await customersSeeder.SeedAsync();
         logger.LogInformation("[Customers] Seeding complete.");

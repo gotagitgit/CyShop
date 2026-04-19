@@ -4,8 +4,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Customers.Infrastructure.Data;
 
-public record CustomerSeedEntry(Guid ExternalId, string FirstName, string LastName, string Email, string ContactNumber);
-
 public class CustomersDataSeeder(CustomersDbContext context, ILogger<CustomersDataSeeder> logger)
 {
     public async Task SeedAsync(CancellationToken ct = default)
