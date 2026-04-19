@@ -4,6 +4,7 @@ using Catalog.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Storage.Infrastructure;
 
 namespace Catalog.Infrastructure;
 
@@ -17,6 +18,7 @@ public static class DependencyInjection
 
         services.AddScoped<ICatalogRepository, CatalogRepository>();
         services.AddScoped<DataSeeder>();
+        services.AddStorageInfrastructure(configuration);
 
         return services;
     }

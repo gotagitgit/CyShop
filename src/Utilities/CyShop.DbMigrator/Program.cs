@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Auth.Infrastructure;
+using Storage.Infrastructure;
 
 var configuration = new ConfigurationBuilder()
     .SetBasePath(AppContext.BaseDirectory)
@@ -17,8 +18,10 @@ services.AddLogging(b => b.AddConsole());
 services.AddInfrastructureServices(configuration);
 services.AddCustomersInfrastructureServices(configuration);
 services.AddAuthInfrastructure(configuration);
+services.AddStorageInfrastructure(configuration);
 services.AddScoped<MigrationRunner>();
 services.AddScoped<AuthSeeder>();
+services.AddSingleton<StorageSeeder>();
 
 
 await using var provider = services.BuildServiceProvider();
