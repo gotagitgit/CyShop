@@ -18,6 +18,10 @@
     <Project Path="src/Security/Auth.Infrastructure/Auth.Infrastructure.csproj" Id="fa31b44a-2fc8-4d3e-89c4-4f208084abda" />
     <Project Path="src/Security/KeycloakClient/KeycloakClient.csproj" />
   </Folder>
+  <Folder Name="/Storage/">
+    <Project Path="src/Storage/S3Client/S3Client.csproj" />
+    <Project Path="src/Storage/Storage.Infrastructure/Storage.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/Shared/">
     <Project Path="src/CyShop.ServiceDefaults/CyShop.ServiceDefaults.csproj" />
   </Folder>

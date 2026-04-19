@@ -13,6 +13,7 @@ public class MigrationRunner(
     CustomersDbContext customersContext,
     CustomersDataSeeder customersSeeder,
     AuthSeeder authSeeder,
+    StorageSeeder storageSeeder,
     IIdentityProviderService identityProviderService,
     IConfiguration configuration,
     ILogger<MigrationRunner> logger)
@@ -27,6 +28,8 @@ public class MigrationRunner(
 
         await authSeeder.SeedAsync(CancellationToken.None);
 
+        await SeedStorageAsync();
+
         logger.LogInformation("All migrations and seeding completed.");
     }
 
@@ -37,9 +40,7 @@ public class MigrationRunner(
         logger.LogInformation("[Catalog] Migrations applied.");
 
         logger.LogInformation("[Catalog] Seeding data...");
-        var seedPath = configuration["SeedData:CatalogJsonPath"]
-            ?? Path.Combine(AppContext.BaseDirectory, "SeedData", "catalog.json");
-        await catalogSeeder.SeedAsync(seedPath);
+        await catalogSeeder.SeedAsync();
         logger.LogInformation("[Catalog] Seeding complete.");
     }
 
@@ -52,5 +53,12 @@ public class MigrationRunner(
         logger.LogInformation("[Customers] Seeding data...");
         await customersSeeder.SeedAsync();
         logger.LogInformation("[Customers] Seeding complete.");
+    }
+
+    private async Task SeedStorageAsync()
+    {
+        logger.LogInformation("[Storage] Seeding images...");
+        await storageSeeder.SeedAsync();
+        logger.LogInformation("[Storage] Image seeding complete.");
     }
 }

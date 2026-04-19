@@ -5,7 +5,7 @@
 POST {{keycloak_url}}/realms/cyshop/protocol/openid-connect/token
 Content-Type: application/x-www-form-urlencoded
 
-grant_type=password&client_id=basket-api&username=user&password=Pass123$
+grant_type=password&client_id=cyshop-web&username=user&password=Pass123$
 
 ###
 

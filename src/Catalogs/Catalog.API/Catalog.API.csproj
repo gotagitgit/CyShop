@@ -1,6 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
+    <Content Include="..\..\..\data\seed\catalog_data\**\*">
+      <Link>SeedData\catalog_data\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Scalar.AspNetCore.Microsoft" />
   </ItemGroup>
@@ -9,10 +16,6 @@
     <ProjectReference Include="..\..\CyShop.ServiceDefaults\CyShop.ServiceDefaults.csproj" />
     <ProjectReference Include="..\Catalog.Application\Catalog.Application.csproj" />
     <ProjectReference Include="..\Catalog.Infrastructure\Catalog.Infrastructure.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Pics\*.webp" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
