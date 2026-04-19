@@ -27,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Catalogs\Catalog.Infrastructure\Catalog.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Customers\Customers.Infrastructure\Customers.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Security\Auth.Infrastructure\Auth.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
