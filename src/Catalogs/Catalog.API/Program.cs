@@ -23,7 +23,7 @@ if (app.Environment.IsDevelopment())
     var context = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
     await context.Database.EnsureCreatedAsync();
     var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
-    await seeder.SeedAsync(Path.Combine(app.Environment.ContentRootPath, "Setup", "catalog.json"));
+    await seeder.SeedAsync();
 }
 
 app.MapDefaultEndpoints();
@@ -37,7 +37,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors();
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 
 app.MapCatalogEndpoints();
 
