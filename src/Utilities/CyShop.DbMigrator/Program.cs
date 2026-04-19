@@ -4,6 +4,7 @@ using CyShop.DbMigrator;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Auth.Infrastructure;
 
 var configuration = new ConfigurationBuilder()
     .SetBasePath(AppContext.BaseDirectory)
@@ -15,10 +16,10 @@ services.AddSingleton<IConfiguration>(configuration);
 services.AddLogging(b => b.AddConsole());
 services.AddInfrastructureServices(configuration);
 services.AddCustomersInfrastructureServices(configuration);
+services.AddAuthInfrastructure(configuration);
 services.AddScoped<MigrationRunner>();
-services.AddScoped<KeycloakSeeder>();
+services.AddScoped<AuthSeeder>();
 
-// Future: services.AddOrdersInfrastructureServices(configuration);
 
 await using var provider = services.BuildServiceProvider();
 using var scope = provider.CreateScope();

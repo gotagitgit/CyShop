@@ -7,6 +7,10 @@ function createMockUserManager(overrides?: Partial<UserManager>): UserManager {
   return {
     getUser: vi.fn().mockResolvedValue(null),
     signinSilent: vi.fn().mockResolvedValue(null),
+    events: {
+      addUserLoaded: vi.fn(),
+      addUserUnloaded: vi.fn(),
+    },
     ...overrides,
   } as unknown as UserManager;
 }
@@ -25,7 +29,7 @@ function mockFetchResponse(status: number, body?: unknown, statusText = 'OK'): v
 describe('apiClient', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    setUserManager(null as unknown as UserManager);
+    setUserManager(createMockUserManager());
   });
 
   describe('setUserManager / getUserManager', () => {
@@ -78,9 +82,9 @@ describe('apiClient', () => {
       expect((callArgs[1]?.headers as Record<string, string>)['Authorization']).toBe('Bearer test-token-123');
     });
 
-    it('does not attach token when requireAuth is false', async () => {
+    it('attaches token even when requireAuth is false if user is available', async () => {
       const um = createMockUserManager({
-        getUser: vi.fn().mockResolvedValue({ access_token: 'should-not-appear' } as User),
+        getUser: vi.fn().mockResolvedValue({ access_token: 'opportunistic-token' } as User),
       });
       setUserManager(um);
       mockFetchResponse(200, []);
@@ -88,7 +92,7 @@ describe('apiClient', () => {
       await apiRequest('GET', '/api/catalog');
 
       const callArgs = vi.mocked(fetch).mock.calls[0];
-      expect((callArgs[1]?.headers as Record<string, string>)['Authorization']).toBeUndefined();
+      expect((callArgs[1]?.headers as Record<string, string>)['Authorization']).toBe('Bearer opportunistic-token');
     });
   });
 
