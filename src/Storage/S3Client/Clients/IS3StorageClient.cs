@@ -8,4 +8,5 @@ public interface IS3StorageClient
     Task<bool> ExistsAsync(string bucketName, string key, CancellationToken ct = default);
     Task CreateBucketIfNotExistsAsync(string bucketName, CancellationToken ct = default);
     Task<bool> BucketHasObjectsAsync(string bucketName, CancellationToken ct = default);
+    Task DeleteAllObjectsAsync(string bucketName, CancellationToken ct = default);
 }

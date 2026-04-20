@@ -9,6 +9,8 @@ public interface IKeycloakAdminClient
 
     Task CreateRealmAsync(string realmName, CancellationToken ct = default);
 
+    Task DeleteRealmAsync(string realmName, CancellationToken ct = default);
+
     Task<UserRepresentation[]> GetUsersAsync(
         string realmName, string? username = null, bool exact = false, CancellationToken ct = default);
 

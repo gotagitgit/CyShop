@@ -67,4 +67,29 @@ internal sealed class S3StorageClient(IAmazonS3 s3Client) : IS3StorageClient
         var response = await s3Client.ListObjectsV2Async(request, ct);
         return response.S3Objects?.Count > 0;
     }
+
+    public async Task DeleteAllObjectsAsync(string bucketName, CancellationToken ct = default)
+    {
+        var request = new ListObjectsV2Request { BucketName = bucketName };
+        ListObjectsV2Response response;
+
+        do
+        {
+            response = await s3Client.ListObjectsV2Async(request, ct);
+
+            if (response.S3Objects is { Count: > 0 })
+            {
+                var deleteRequest = new DeleteObjectsRequest
+                {
+                    BucketName = bucketName,
+                    Objects = response.S3Objects.Select(o => new KeyVersion { Key = o.Key }).ToList()
+                };
+
+                await s3Client.DeleteObjectsAsync(deleteRequest, ct);
+            }
+
+            request.ContinuationToken = response.NextContinuationToken;
+        }
+        while (response.IsTruncated == true);
+    }
 }
