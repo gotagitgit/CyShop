@@ -1,4 +1,4 @@
-namespace Storage.Infrastructure.Services;
+﻿namespace Cyshop.Common.Services;
 
 public interface IStorageService
 {
@@ -9,3 +9,4 @@ public interface IStorageService
     Task CreateBucketIfNotExistsAsync(string bucketName, CancellationToken ct = default);
     Task<bool> BucketHasObjectsAsync(string bucketName, CancellationToken ct = default);
 }
+

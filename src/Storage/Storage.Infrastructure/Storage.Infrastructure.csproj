@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../S3Client/S3Client.csproj" />
+    <ProjectReference Include="..\..\Common\Cyshop.Common\Cyshop.Common.csproj" />
   </ItemGroup>
 
 </Project>
