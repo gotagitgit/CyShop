@@ -2,8 +2,8 @@ using Catalog.Application.DTOs;
 using Catalog.Application.Interfaces;
 using Catalog.Domain.Entities;
 using Catalog.Domain.Interfaces;
+using Cyshop.Common.Services;
 using Microsoft.Extensions.Configuration;
-using Storage.Infrastructure.Services;
 
 namespace Catalog.Application.Services;
 

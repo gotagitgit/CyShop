@@ -1,6 +1,6 @@
+using Cyshop.Common.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Storage.Infrastructure.Services;
 
 namespace CyShop.DbMigrator;
 

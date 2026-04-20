@@ -1,3 +1,4 @@
+using Cyshop.Common.Services;
 using S3Client.Clients;
 
 namespace Storage.Infrastructure.Services;

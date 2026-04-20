@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Common\Cyshop.Common\Cyshop.Common.csproj" />
     <ProjectReference Include="..\Catalog.Domain\Catalog.Domain.csproj" />
-    <ProjectReference Include="..\..\Storage\Storage.Infrastructure\Storage.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
