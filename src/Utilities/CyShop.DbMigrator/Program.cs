@@ -6,6 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Auth.Infrastructure;
 using Storage.Infrastructure;
+using StackExchange.Redis;
+
+var options = CommandLineOptions.Parse(args);
 
 var configuration = new ConfigurationBuilder()
     .SetBasePath(AppContext.BaseDirectory)
@@ -19,10 +22,19 @@ services.AddInfrastructureServices(configuration);
 services.AddCustomersInfrastructureServices(configuration);
 services.AddAuthInfrastructure(configuration);
 services.AddStorageInfrastructure(configuration);
+services.AddSingleton(options);
 services.AddScoped<MigrationRunner>();
 services.AddScoped<AuthSeeder>();
 services.AddSingleton<StorageSeeder>();
 
+var redisConnectionString = configuration.GetConnectionString("Redis") ?? "localhost:6379";
+services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect($"{redisConnectionString},allowAdmin=true"));
+
+services.AddTransient<ClientCredentialsDelegatingHandler>();
+services.AddHttpClient<CatalogApiSeeder>()
+    .AddHttpMessageHandler<ClientCredentialsDelegatingHandler>();
+services.AddHttpClient<CustomerApiSeeder>()
+    .AddHttpMessageHandler<ClientCredentialsDelegatingHandler>();
 
 await using var provider = services.BuildServiceProvider();
 using var scope = provider.CreateScope();

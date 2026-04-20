@@ -1,5 +1,7 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -77,5 +79,20 @@ public static class AuthenticationExtensions
         }
 
         return builder.Services;
+    }
+
+    public static Guid? ResolveExternalId(this ClaimsPrincipal user, HttpContext httpContext)
+    {
+        var sub = user.FindFirstValue("sub");
+
+        if (!string.IsNullOrEmpty(sub) && Guid.TryParse(sub, out var fromSub))
+            return fromSub;
+
+        if (user.HasClaim(c => c.Type == "scope" && c.Value.Contains("customers.api"))
+            && httpContext.Request.Headers.TryGetValue("X-On-Behalf-Of", out var onBehalf)
+            && Guid.TryParse(onBehalf.FirstOrDefault(), out var fromHeader))
+            return fromHeader;
+
+        return null;
     }
 }

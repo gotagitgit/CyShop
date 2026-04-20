@@ -44,6 +44,17 @@ public partial class KeycloakAdminClient : IKeycloakAdminClient
         response.EnsureSuccessStatusCode();
     }
 
+    public async Task DeleteRealmAsync(
+        string realmName, CancellationToken ct = default)
+    {
+        var response = await _httpClient.DeleteAsync($"/admin/realms/{realmName}", ct);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            return;
+
+        response.EnsureSuccessStatusCode();
+    }
+
     public async Task<JsonElement[]?> GetClientsByClientIdAsync(
         string realmName, string clientId, CancellationToken ct = default)
     {

@@ -1,3 +1,4 @@
+using Cyshop.Common.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using S3Client;

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Customers.Application.DTOs;
 using Customers.Application.Interfaces;
+using CyShop.ServiceDefaults;
 
 namespace Customers.API.Endpoints;
 
@@ -10,29 +11,29 @@ public static class CustomerEndpoints
     {
         var group = app.MapGroup("/api/customers").RequireAuthorization();
 
-        group.MapGet("/addresses", async (ClaimsPrincipal user, ICustomerAddressService addressService, CancellationToken ct) =>
+        group.MapGet("/addresses", async (HttpContext httpContext, ClaimsPrincipal user, ICustomerAddressService addressService, CancellationToken ct) =>
         {
-            var sub = user.FindFirstValue("sub");
+            var externalId = user.ResolveExternalId(httpContext);
 
-            if (string.IsNullOrEmpty(sub) || !Guid.TryParse(sub, out var externalId))
+            if (externalId is null)
             {
                 return Results.Ok(Array.Empty<object>());
             }
 
-            var addresses = await addressService.GetAddressesByExternalIdAsync(externalId, ct);
+            var addresses = await addressService.GetAddressesByExternalIdAsync(externalId.Value, ct);
             return Results.Ok(addresses);
         });
 
-        group.MapGet("/profile", async (ClaimsPrincipal user, ICustomerService customerService, CancellationToken ct) =>
+        group.MapGet("/profile", async (HttpContext httpContext, ClaimsPrincipal user, ICustomerService customerService, CancellationToken ct) =>
         {
-            var sub = user.FindFirstValue("sub");
+            var externalId = user.ResolveExternalId(httpContext);
 
-            if (string.IsNullOrEmpty(sub) || !Guid.TryParse(sub, out var externalId))
+            if (externalId is null)
             {
                 return Results.NotFound();
             }
 
-            var customer = await customerService.GetByExternalIdAsync(externalId, ct);
+            var customer = await customerService.GetByExternalIdAsync(externalId.Value, ct);
 
             if (customer is null)
             {
@@ -42,18 +43,18 @@ public static class CustomerEndpoints
             return Results.Ok(customer);
         });
 
-        group.MapPost("/profile", async (ClaimsPrincipal user, CreateCustomerDto dto, ICustomerService customerService, CancellationToken ct) =>
+        group.MapPost("/profile", async (HttpContext httpContext, ClaimsPrincipal user, CreateCustomerDto dto, ICustomerService customerService, CancellationToken ct) =>
         {
-            var sub = user.FindFirstValue("sub");
+            var externalId = user.ResolveExternalId(httpContext);
 
-            if (string.IsNullOrEmpty(sub) || !Guid.TryParse(sub, out var externalId))
+            if (externalId is null)
             {
                 return Results.NotFound();
             }
 
             try
             {
-                var result = await customerService.CreateAsync(externalId, dto, ct);
+                var result = await customerService.CreateAsync(externalId.Value, dto, ct);
                 return Results.Created($"/api/customers/profile", result);
             }
             catch (InvalidOperationException)
@@ -66,18 +67,18 @@ public static class CustomerEndpoints
             }
         });
 
-        group.MapPut("/profile", async (ClaimsPrincipal user, UpdateCustomerDto dto, ICustomerService customerService, CancellationToken ct) =>
+        group.MapPut("/profile", async (HttpContext httpContext, ClaimsPrincipal user, UpdateCustomerDto dto, ICustomerService customerService, CancellationToken ct) =>
         {
-            var sub = user.FindFirstValue("sub");
+            var externalId = user.ResolveExternalId(httpContext);
 
-            if (string.IsNullOrEmpty(sub) || !Guid.TryParse(sub, out var externalId))
+            if (externalId is null)
             {
                 return Results.NotFound();
             }
 
             try
             {
-                var result = await customerService.UpdateAsync(externalId, dto, ct);
+                var result = await customerService.UpdateAsync(externalId.Value, dto, ct);
                 return Results.Ok(result);
             }
             catch (KeyNotFoundException)
@@ -90,16 +91,16 @@ public static class CustomerEndpoints
             }
         });
 
-        group.MapDelete("/profile", async (ClaimsPrincipal user, ICustomerService customerService, CancellationToken ct) =>
+        group.MapDelete("/profile", async (HttpContext httpContext, ClaimsPrincipal user, ICustomerService customerService, CancellationToken ct) =>
         {
-            var sub = user.FindFirstValue("sub");
+            var externalId = user.ResolveExternalId(httpContext);
 
-            if (string.IsNullOrEmpty(sub) || !Guid.TryParse(sub, out var externalId))
+            if (externalId is null)
             {
                 return Results.NotFound();
             }
 
-            var deleted = await customerService.DeleteAsync(externalId, ct);
+            var deleted = await customerService.DeleteAsync(externalId.Value, ct);
 
             if (!deleted)
             {
@@ -109,18 +110,18 @@ public static class CustomerEndpoints
             return Results.NoContent();
         });
 
-        group.MapPost("/addresses", async (ClaimsPrincipal user, CreateAddressDto dto, ICustomerAddressService addressService, CancellationToken ct) =>
+        group.MapPost("/addresses", async (HttpContext httpContext, ClaimsPrincipal user, CreateAddressDto dto, ICustomerAddressService addressService, CancellationToken ct) =>
         {
-            var sub = user.FindFirstValue("sub");
+            var externalId = user.ResolveExternalId(httpContext);
 
-            if (string.IsNullOrEmpty(sub) || !Guid.TryParse(sub, out var externalId))
+            if (externalId is null)
             {
                 return Results.NotFound();
             }
 
             try
             {
-                var result = await addressService.CreateAsync(externalId, dto, ct);
+                var result = await addressService.CreateAsync(externalId.Value, dto, ct);
                 return Results.Created($"/api/customers/addresses/{result.Id}", result);
             }
             catch (KeyNotFoundException)
@@ -133,18 +134,18 @@ public static class CustomerEndpoints
             }
         });
 
-        group.MapPut("/addresses/{addressId}", async (Guid addressId, ClaimsPrincipal user, UpdateAddressDto dto, ICustomerAddressService addressService, CancellationToken ct) =>
+        group.MapPut("/addresses/{addressId}", async (Guid addressId, HttpContext httpContext, ClaimsPrincipal user, UpdateAddressDto dto, ICustomerAddressService addressService, CancellationToken ct) =>
         {
-            var sub = user.FindFirstValue("sub");
+            var externalId = user.ResolveExternalId(httpContext);
 
-            if (string.IsNullOrEmpty(sub) || !Guid.TryParse(sub, out var externalId))
+            if (externalId is null)
             {
                 return Results.NotFound();
             }
 
             try
             {
-                var result = await addressService.UpdateAsync(externalId, addressId, dto, ct);
+                var result = await addressService.UpdateAsync(externalId.Value, addressId, dto, ct);
                 return Results.Ok(result);
             }
             catch (KeyNotFoundException)
@@ -157,18 +158,18 @@ public static class CustomerEndpoints
             }
         });
 
-        group.MapDelete("/addresses/{addressId}", async (Guid addressId, ClaimsPrincipal user, ICustomerAddressService addressService, CancellationToken ct) =>
+        group.MapDelete("/addresses/{addressId}", async (Guid addressId, HttpContext httpContext, ClaimsPrincipal user, ICustomerAddressService addressService, CancellationToken ct) =>
         {
-            var sub = user.FindFirstValue("sub");
+            var externalId = user.ResolveExternalId(httpContext);
 
-            if (string.IsNullOrEmpty(sub) || !Guid.TryParse(sub, out var externalId))
+            if (externalId is null)
             {
                 return Results.NotFound();
             }
 
             try
             {
-                var deleted = await addressService.DeleteAsync(externalId, addressId, ct);
+                var deleted = await addressService.DeleteAsync(externalId.Value, addressId, ct);
 
                 if (!deleted)
                 {

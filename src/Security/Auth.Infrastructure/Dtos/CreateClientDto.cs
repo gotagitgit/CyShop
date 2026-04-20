@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace Auth.Infrastructure.Dtos;
 
@@ -19,6 +20,11 @@ public class CreateClientDto
     public string[] RedirectUris { get; init; }
 
     public string[] WebOrigins { get; init; }
+
+    public bool ServiceAccountsEnabled { get; init; } = false;
+
+    [JsonPropertyName("secret")]
+    public string? ClientSecret { get; init; }
 
     public Dictionary<string, string> Attributes { get; init; } = new Dictionary<string, string>();
 }

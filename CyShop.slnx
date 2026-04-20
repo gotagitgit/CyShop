@@ -8,6 +8,10 @@
     <Project Path="src/Catalogs/Catalog.Domain/Catalog.Domain.csproj" />
     <Project Path="src/Catalogs/Catalog.Infrastructure/Catalog.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/Common/">
+    <Project Path="src/Common/Cyshop.Common/Cyshop.Common.csproj" Id="e038a75d-445e-4f52-9826-af46e597e13c" />
+    <Project Path="src/Common/CyShop.ServiceDefaults/CyShop.ServiceDefaults.csproj" />
+  </Folder>
   <Folder Name="/Customers/">
     <Project Path="src/Customers/Customers.API/Customers.API.csproj" />
     <Project Path="src/Customers/Customers.Application/Customers.Application.csproj" />
@@ -21,9 +25,6 @@
   <Folder Name="/Storage/">
     <Project Path="src/Storage/S3Client/S3Client.csproj" />
     <Project Path="src/Storage/Storage.Infrastructure/Storage.Infrastructure.csproj" />
-  </Folder>
-  <Folder Name="/Shared/">
-    <Project Path="src/CyShop.ServiceDefaults/CyShop.ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />

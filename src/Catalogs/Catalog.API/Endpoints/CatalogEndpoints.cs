@@ -1,3 +1,4 @@
+using Catalog.Application.DTOs;
 using Catalog.Application.Interfaces;
 
 namespace Catalog.API.Endpoints;
@@ -40,6 +41,24 @@ public static class CatalogEndpoints
 
             return Results.File(stream, "image/webp");
         });
+
+        group.MapPost("/", async (CreateCatalogItemDto dto, ICatalogService catalogService, CancellationToken ct) =>
+        {
+            var created = await catalogService.CreateAsync(dto, ct);
+            return Results.Created($"/api/catalog/{created.Id}", created);
+        }).RequireAuthorization();
+
+        group.MapPut("/{id:guid}", async (Guid id, UpdateCatalogItemDto dto, ICatalogService catalogService, CancellationToken ct) =>
+        {
+            var updated = await catalogService.UpdateAsync(id, dto, ct);
+            return updated is not null ? Results.Ok(updated) : Results.NotFound();
+        }).RequireAuthorization();
+
+        group.MapDelete("/{id:guid}", async (Guid id, ICatalogService catalogService, CancellationToken ct) =>
+        {
+            var deleted = await catalogService.DeleteAsync(id, ct);
+            return deleted ? Results.NoContent() : Results.NotFound();
+        }).RequireAuthorization();
 
         return app;
     }

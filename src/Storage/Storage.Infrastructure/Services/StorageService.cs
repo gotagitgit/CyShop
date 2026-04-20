@@ -1,3 +1,4 @@
+using Cyshop.Common.Services;
 using S3Client.Clients;
 
 namespace Storage.Infrastructure.Services;
@@ -21,4 +22,7 @@ internal sealed class StorageService(IS3StorageClient s3Client) : IStorageServic
 
     public Task<bool> BucketHasObjectsAsync(string bucketName, CancellationToken ct = default)
         => s3Client.BucketHasObjectsAsync(bucketName, ct);
+
+    public Task DeleteAllObjectsAsync(string bucketName, CancellationToken ct = default)
+        => s3Client.DeleteAllObjectsAsync(bucketName, ct);
 }

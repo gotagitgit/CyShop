@@ -2,8 +2,8 @@ using Catalog.Application.DTOs;
 using Catalog.Application.Interfaces;
 using Catalog.Domain.Entities;
 using Catalog.Domain.Interfaces;
+using Cyshop.Common.Services;
 using Microsoft.Extensions.Configuration;
-using Storage.Infrastructure.Services;
 
 namespace Catalog.Application.Services;
 
@@ -55,4 +55,48 @@ public class CatalogService(
 
     private static CatalogItemDto MapToDto(CatalogItem item) =>
         new(item.Id, item.Type, item.Brand, item.Name, item.Description, item.Price, item.ImagePath);
+
+    public async Task<CatalogItemDto> CreateAsync(CreateCatalogItemDto dto, CancellationToken ct = default)
+    {
+        var brand = await repository.FindOrCreateBrandAsync(dto.BrandName, ct);
+        var type = await repository.FindOrCreateTypeAsync(dto.TypeName, ct);
+
+        var item = new CatalogItem(
+            id: Guid.NewGuid(),
+            type: type,
+            brand: brand,
+            name: dto.Name,
+            description: dto.Description,
+            price: dto.Price,
+            imagePath: dto.ImagePath);
+
+        var created = await repository.AddAsync(item, ct);
+        return MapToDto(created);
+    }
+
+    public async Task<CatalogItemDto?> UpdateAsync(Guid id, UpdateCatalogItemDto dto, CancellationToken ct = default)
+    {
+        var existing = await repository.GetByIdAsync(id, ct);
+        if (existing is null) return null;
+
+        var brand = await repository.FindOrCreateBrandAsync(dto.BrandName, ct);
+        var type = await repository.FindOrCreateTypeAsync(dto.TypeName, ct);
+
+        var updated = new CatalogItem(
+            id: id,
+            type: type,
+            brand: brand,
+            name: dto.Name,
+            description: dto.Description,
+            price: dto.Price,
+            imagePath: dto.ImagePath);
+
+        await repository.UpdateAsync(updated, ct);
+        return MapToDto(updated);
+    }
+
+    public async Task<bool> DeleteAsync(Guid id, CancellationToken ct = default)
+    {
+        return await repository.DeleteAsync(id, ct);
+    }
 }
