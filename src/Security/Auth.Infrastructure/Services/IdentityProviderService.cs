@@ -36,6 +36,12 @@ internal sealed class IdentityProviderService : IIdentityProviderService
         _logger.LogInformation("Realm '{Realm}' created.", realmName);
     }
 
+    public async Task DeleteRealmAsync(string realmName)
+    {
+        await _keycloakAdminClient.DeleteRealmAsync(realmName);
+        _logger.LogInformation("Realm '{Realm}' deleted.", realmName);
+    }
+
     public async Task CreateClientAsync(string realmName, string clientId, CancellationToken cancellationToken)
     {
         var client = new CreateClientDto().CreateDefault(clientId);
