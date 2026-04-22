@@ -6,6 +6,7 @@ import react from '@vitejs/plugin-react'
 const catalogTarget = process.env.services__catalog_api__https__0 ?? process.env.services__catalog_api__http__0 ?? 'http://localhost:5146'
 const basketTarget = process.env.services__basket_api__https__0 ?? process.env.services__basket_api__http__0 ?? 'https://localhost:7097'
 const customersTarget = process.env.services__customers_api__https__0 ?? process.env.services__customers_api__http__0 ?? 'https://localhost:7261'
+const ordersTarget = process.env.services__orders_api__https__0 ?? process.env.services__orders_api__http__0 ?? 'https://localhost:7042'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -24,6 +25,11 @@ export default defineConfig({
       },
       '/api/customers': {
         target: customersTarget,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/orders': {
+        target: ordersTarget,
         changeOrigin: true,
         secure: false,
       },
