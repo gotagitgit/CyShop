@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using CyShop.ServiceDefaults;
 using Orders.API.Middleware;
-using Orders.API.Models;
 using Orders.Application.DTOs;
 using Orders.Application.Interfaces;
 using Orders.Infrastructure.Data;
@@ -18,7 +17,7 @@ public static class OrderEndpoints
         group.MapPost("/", async (
             HttpContext httpContext,
             ClaimsPrincipal user,
-            CreateOrderRequest request,
+            CreateOrderDto request,
             IOrderService orderService,
             OrdersDbContext dbContext,
             CancellationToken ct) =>
@@ -55,19 +54,7 @@ public static class OrderEndpoints
                 return Results.Ok();
             }
 
-            // Map request to DTO
-            var dto = new CreateOrderDto(
-                request.CustomerName,
-                request.Items.Select(i => new CreateOrderItemDto(
-                    i.ProductId, i.ProductName, i.UnitPrice, i.Quantity)).ToList(),
-                new CreateOrderShippingAddressDto(
-                    request.ShippingAddress.Street,
-                    request.ShippingAddress.City,
-                    request.ShippingAddress.State,
-                    request.ShippingAddress.Country,
-                    request.ShippingAddress.ZipCode));
-
-            await orderService.CreateOrderAsync(customerId.Value, dto, ct);
+            await orderService.CreateOrderAsync(customerId.Value, request, ct);
 
             // Save idempotency record
             dbContext.IdempotencyRecords.Add(new IdempotencyRecord
