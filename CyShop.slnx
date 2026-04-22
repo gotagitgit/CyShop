@@ -18,6 +18,12 @@
     <Project Path="src/Customers/Customers.Domain/Customers.Domain.csproj" />
     <Project Path="src/Customers/Customers.Infrastructure/Customers.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/Orders/">
+    <Project Path="src/Order/Orders.API/Orders.API.csproj" />
+    <Project Path="src/Order/Orders.Application/Orders.Application.csproj" />
+    <Project Path="src/Order/Orders.Domain/Orders.Domain.csproj" />
+    <Project Path="src/Order/Orders.Infrastructure/Orders.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/Security/">
     <Project Path="src/Security/Auth.Infrastructure/Auth.Infrastructure.csproj" Id="fa31b44a-2fc8-4d3e-89c4-4f208084abda" />
     <Project Path="src/Security/KeycloakClient/KeycloakClient.csproj" />

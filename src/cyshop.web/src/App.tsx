@@ -7,6 +7,7 @@ import CheckoutPage from './pages/CheckoutPage';
 import NotFoundPage from './pages/NotFoundPage';
 import AuthCallbackPage from './pages/AuthCallbackPage';
 import ProfilePage from './pages/ProfilePage';
+import OrdersPage from './pages/OrdersPage';
 import { AuthGuard } from './auth/AuthGuard';
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="checkout" element={<CheckoutPage />} />
           <Route path="auth/callback" element={<AuthCallbackPage />} />
           <Route path="profile" element={<AuthGuard><ProfilePage /></AuthGuard>} />
+          <Route path="orders" element={<OrdersPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

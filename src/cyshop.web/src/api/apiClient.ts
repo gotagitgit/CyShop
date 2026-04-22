@@ -60,9 +60,9 @@ async function renewToken(): Promise<string | null> {
 export async function apiRequest<T>(
   method: HttpMethod,
   url: string,
-  options?: { body?: unknown; requireAuth?: boolean }
+  options?: { body?: unknown; requireAuth?: boolean; headers?: Record<string, string> }
 ): Promise<T> {
-  const { body, requireAuth = false } = options ?? {};
+  const { body, requireAuth = false, headers: customHeaders } = options ?? {};
 
   const headers: Record<string, string> = {};
 
@@ -75,6 +75,10 @@ export async function apiRequest<T>(
 
   if (body !== undefined) {
     headers['Content-Type'] = 'application/json';
+  }
+
+  if (customHeaders) {
+    Object.assign(headers, customHeaders);
   }
 
   const init: RequestInit = {
@@ -116,10 +120,11 @@ export async function apiRequest<T>(
     throw error;
   }
 
-  // Handle 204 No Content
-  if (response.status === 204) {
+  // Handle empty response body (204 No Content, 201 Created with no body, etc.)
+  const text = await response.text();
+  if (!text) {
     return undefined as T;
   }
 
-  return response.json() as Promise<T>;
+  return JSON.parse(text) as T;
 }

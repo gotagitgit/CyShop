@@ -1,18 +1,28 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { AuthGuard } from '../auth/AuthGuard';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   fetchAddresses,
   setSelectedAddressId,
 } from '../store/checkoutSlice';
+import { createOrder } from '../store/ordersSlice';
+import { fetchProfile } from '../store/customerSlice';
 
 function CheckoutContent() {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { selectedItems, addresses, selectedAddressId, addressStatus, addressError } =
     useAppSelector((state) => state.checkout);
+  const profile = useAppSelector((state) => state.customer.profile);
+
+  const idempotencyKeyRef = useRef(crypto.randomUUID());
+  const [orderLoading, setOrderLoading] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(fetchAddresses());
+    dispatch(fetchProfile());
   }, [dispatch]);
 
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId);
@@ -21,6 +31,50 @@ function CheckoutContent() {
     (sum, item) => sum + item.unitPrice * item.quantity,
     0,
   );
+
+  const canPlaceOrder = selectedItems.length > 0 && selectedAddress != null;
+
+  const handlePlaceOrder = async () => {
+    if (!canPlaceOrder || !selectedAddress || !profile) return;
+
+    setOrderLoading(true);
+    setOrderError(null);
+
+    try {
+      await dispatch(
+        createOrder({
+          request: {
+            customerName: `${profile.firstName} ${profile.lastName}`,
+            items: selectedItems.map((item) => ({
+              productId: item.productId,
+              productName: item.productName,
+              unitPrice: item.unitPrice,
+              quantity: item.quantity,
+            })),
+            shippingAddress: {
+              street: selectedAddress.street,
+              city: selectedAddress.city,
+              state: selectedAddress.state,
+              country: selectedAddress.country,
+              zipCode: selectedAddress.zipCode,
+            },
+          },
+          idempotencyKey: idempotencyKeyRef.current,
+        }),
+      ).unwrap();
+      navigate('/orders');
+    } catch (err: unknown) {
+      const message =
+        typeof err === 'string'
+          ? err
+          : err instanceof Error
+            ? err.message
+            : 'Failed to place order';
+      setOrderError(message);
+    } finally {
+      setOrderLoading(false);
+    }
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -133,6 +187,35 @@ function CheckoutContent() {
           </>
         )}
       </section>
+
+      {/* Order Error */}
+      {orderError && (
+        <div role="alert" style={{ color: '#dc3545', padding: '0.75rem', background: '#f8d7da', borderRadius: '8px' }}>
+          {orderError}
+        </div>
+      )}
+
+      {/* Place Order Button */}
+      {canPlaceOrder && (
+        <div style={{ textAlign: 'right' }}>
+          <button
+            onClick={handlePlaceOrder}
+            disabled={orderLoading}
+            style={{
+              padding: '0.75rem 2rem',
+              fontSize: '1rem',
+              fontWeight: 600,
+              borderRadius: '8px',
+              border: 'none',
+              background: orderLoading ? '#6c757d' : '#0d6efd',
+              color: '#ffffff',
+              cursor: orderLoading ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {orderLoading ? 'Placing Order…' : 'Place Order'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

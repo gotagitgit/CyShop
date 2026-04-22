@@ -18,4 +18,6 @@ builder.AddViteApp("cyshop-web", "../../CyShop.Web")
 
 builder.AddProject<Projects.Customers_API>("customers-api");
 
+builder.AddProject<Projects.Orders_API>("orders-api");
+
 builder.Build().Run();
