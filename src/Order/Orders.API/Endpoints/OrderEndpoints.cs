@@ -1,10 +1,7 @@
 using System.Security.Claims;
 using CyShop.ServiceDefaults;
-using Orders.API.Middleware;
 using Orders.Application.DTOs;
 using Orders.Application.Interfaces;
-using Orders.Infrastructure.Data;
-using Orders.Infrastructure.Data.Entities;
 
 namespace Orders.API.Endpoints;
 
@@ -19,7 +16,7 @@ public static class OrderEndpoints
             ClaimsPrincipal user,
             CreateOrderDto request,
             IOrderService orderService,
-            OrdersDbContext dbContext,
+            IIdempotencyService idempotencyService,
             CancellationToken ct) =>
         {
             // Validate Idempotency-Key header
@@ -49,7 +46,7 @@ public static class OrderEndpoints
             }
 
             // Check idempotency
-            if (await IdempotencyMiddleware.IsDuplicateAsync(idempotencyKey, dbContext))
+            if (await idempotencyService.IsDuplicateAsync(idempotencyKey, ct))
             {
                 return Results.Ok();
             }
@@ -57,12 +54,7 @@ public static class OrderEndpoints
             await orderService.CreateOrderAsync(customerId.Value, request, ct);
 
             // Save idempotency record
-            dbContext.IdempotencyRecords.Add(new IdempotencyRecord
-            {
-                IdempotencyKey = idempotencyKey,
-                Timestamp = DateTime.UtcNow
-            });
-            await dbContext.SaveChangesAsync(ct);
+            await idempotencyService.RecordAsync(idempotencyKey, ct);
 
             return Results.Created();
         });

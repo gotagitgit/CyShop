@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Orders.Application.Interfaces;
 using Orders.Domain.Interfaces;
 using Orders.Infrastructure.Data;
 using Orders.Infrastructure.Repositories;
@@ -16,6 +17,7 @@ public static class DependencyInjection
             options.UseNpgsql(configuration.GetConnectionString("OrdersDb")));
 
         services.AddScoped<IOrderRepository, OrderRepository>();
+        services.AddScoped<IIdempotencyRepository, IdempotencyRepository>();
 
         return services;
     }
