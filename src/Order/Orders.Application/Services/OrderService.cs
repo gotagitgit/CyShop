@@ -1,3 +1,4 @@
+using Cyshop.Common.Models;
 using Orders.Application.DTOs;
 using Orders.Application.Interfaces;
 using Orders.Domain.Entities;
@@ -7,14 +8,14 @@ using Orders.Domain.ValueObjects;
 
 namespace Orders.Application.Services;
 
-public class OrderService(IOrderRepository repository) : IOrderService
+public class OrderService(IOrderRepository repository, ICurrentUser currentUser) : IOrderService
 {
-    public async Task CreateOrderAsync(Guid customerId, CreateOrderDto dto, CancellationToken ct = default)
+    public async Task CreateOrderAsync(CreateOrderDto dto, CancellationToken ct = default)
     {
         var order = new Order
         {
             Id = Guid.NewGuid(),
-            CustomerId = customerId,
+            CustomerId = currentUser.UserId,
             CustomerName = dto.CustomerName,
             OrderDate = DateTime.UtcNow,
             Status = OrderStatus.Submitted,
@@ -37,17 +38,17 @@ public class OrderService(IOrderRepository repository) : IOrderService
         await repository.AddAsync(order, ct);
     }
 
-    public async Task<IReadOnlyList<OrderDto>> GetOrdersByCustomerAsync(Guid customerId, CancellationToken ct = default)
+    public async Task<IReadOnlyList<OrderDto>> GetOrdersByCustomerAsync(CancellationToken ct = default)
     {
-        var orders = await repository.GetByCustomerIdAsync(customerId, ct);
+        var orders = await repository.GetByCustomerIdAsync(currentUser.UserId, ct);
         return orders.Select(MapToOrderDto).ToList();
     }
 
-    public async Task<OrderDetailDto?> GetOrderByIdAsync(Guid orderId, Guid customerId, CancellationToken ct = default)
+    public async Task<OrderDetailDto?> GetOrderByIdAsync(Guid orderId, CancellationToken ct = default)
     {
         var order = await repository.GetByIdAsync(orderId, ct);
 
-        if (order is null || order.CustomerId != customerId)
+        if (order is null || order.CustomerId != currentUser.UserId)
             return null;
 
         return MapToOrderDetailDto(order);

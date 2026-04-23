@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using Cyshop.Common.Models;
+using CyShop.ServiceDefaults.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -8,6 +10,21 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace CyShop.ServiceDefaults;
+
+public static class CurrentUserExtensions
+{
+    public static IServiceCollection AddCurrentUser(this IServiceCollection services)
+    {
+        services.AddScoped<CurrentUser>();
+        services.AddScoped<ICurrentUser>(sp => sp.GetRequiredService<CurrentUser>());
+        return services;
+    }
+
+    public static IApplicationBuilder UseCurrentUser(this IApplicationBuilder app)
+    {
+        return app.UseMiddleware<CurrentUserMiddleware>();
+    }
+}
 
 public static class AuthenticationExtensions
 {

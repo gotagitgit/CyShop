@@ -16,6 +16,7 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.AddDefaultCors();
 
 builder.AddDefaultAuthentication();
+builder.Services.AddCurrentUser();
 
 var app = builder.Build();
 
@@ -31,6 +32,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseCurrentUser();
 
 app.UseTransactionMiddleware();
 

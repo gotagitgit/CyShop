@@ -1,5 +1,3 @@
-using System.Security.Claims;
-using CyShop.ServiceDefaults;
 using Orders.Application.DTOs;
 using Orders.Application.Interfaces;
 
@@ -13,7 +11,6 @@ public static class OrderEndpoints
 
         group.MapPost("/", async (
             HttpContext httpContext,
-            ClaimsPrincipal user,
             CreateOrderDto request,
             IOrderService orderService,
             IIdempotencyService idempotencyService,
@@ -38,20 +35,13 @@ public static class OrderEndpoints
                 return Results.BadRequest(new { error = "At least one order item is required" });
             }
 
-            // Resolve customer identity
-            var customerId = user.ResolveExternalId(httpContext);
-            if (customerId is null)
-            {
-                return Results.Unauthorized();
-            }
-
             // Check idempotency
             if (await idempotencyService.IsDuplicateAsync(idempotencyKey, ct))
             {
                 return Results.Ok();
             }
 
-            await orderService.CreateOrderAsync(customerId.Value, request, ct);
+            await orderService.CreateOrderAsync(request, ct);
 
             // Save idempotency record
             await idempotencyService.RecordAsync(idempotencyKey, ct);
@@ -60,35 +50,19 @@ public static class OrderEndpoints
         });
 
         group.MapGet("/", async (
-            HttpContext httpContext,
-            ClaimsPrincipal user,
             IOrderService orderService,
             CancellationToken ct) =>
         {
-            var customerId = user.ResolveExternalId(httpContext);
-            if (customerId is null)
-            {
-                return Results.Unauthorized();
-            }
-
-            var orders = await orderService.GetOrdersByCustomerAsync(customerId.Value, ct);
+            var orders = await orderService.GetOrdersByCustomerAsync(ct);
             return Results.Ok(orders);
         });
 
         group.MapGet("/{id:guid}", async (
             Guid id,
-            HttpContext httpContext,
-            ClaimsPrincipal user,
             IOrderService orderService,
             CancellationToken ct) =>
         {
-            var customerId = user.ResolveExternalId(httpContext);
-            if (customerId is null)
-            {
-                return Results.Unauthorized();
-            }
-
-            var order = await orderService.GetOrderByIdAsync(id, customerId.Value, ct);
+            var order = await orderService.GetOrderByIdAsync(id, ct);
             if (order is null)
             {
                 return Results.NotFound();
