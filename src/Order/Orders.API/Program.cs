@@ -1,4 +1,5 @@
 using Orders.API.Endpoints;
+using Orders.API.Middleware;
 using Orders.Application;
 using Orders.Infrastructure;
 using Orders.Infrastructure.Data;
@@ -30,6 +31,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseTransactionMiddleware();
 
 app.MapOrderEndpoints();
 
