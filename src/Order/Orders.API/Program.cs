@@ -1,4 +1,5 @@
 using Orders.API.Endpoints;
+using Orders.API.Middleware;
 using Orders.Application;
 using Orders.Infrastructure;
 using Orders.Infrastructure.Data;
@@ -10,11 +11,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 builder.Services.AddOpenApi();
 builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddOrdersInfrastructureServices(builder.Configuration);
 
 builder.AddDefaultCors();
 
 builder.AddDefaultAuthentication();
+builder.Services.AddCurrentUser();
 
 var app = builder.Build();
 
@@ -30,6 +32,10 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseCurrentUser();
+
+app.UseTransactionMiddleware();
 
 app.MapOrderEndpoints();
 

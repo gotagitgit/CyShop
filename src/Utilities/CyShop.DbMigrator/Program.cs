@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Auth.Infrastructure;
 using Storage.Infrastructure;
+using Orders.Infrastructure;
 using StackExchange.Redis;
 
 var options = CommandLineOptions.Parse(args);
@@ -22,6 +23,7 @@ services.AddInfrastructureServices(configuration);
 services.AddCustomersInfrastructureServices(configuration);
 services.AddAuthInfrastructure(configuration);
 services.AddStorageInfrastructure(configuration);
+services.AddOrdersInfrastructureServices(configuration);
 services.AddSingleton(options);
 services.AddScoped<MigrationRunner>();
 services.AddScoped<AuthSeeder>();

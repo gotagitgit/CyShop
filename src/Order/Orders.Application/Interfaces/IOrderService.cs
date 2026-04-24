@@ -4,7 +4,7 @@ namespace Orders.Application.Interfaces;
 
 public interface IOrderService
 {
-    Task CreateOrderAsync(Guid customerId, CreateOrderDto dto, CancellationToken ct = default);
-    Task<IReadOnlyList<OrderDto>> GetOrdersByCustomerAsync(Guid customerId, CancellationToken ct = default);
-    Task<OrderDetailDto?> GetOrderByIdAsync(Guid orderId, Guid customerId, CancellationToken ct = default);
+    Task CreateOrderAsync(CreateOrderDto dto, CancellationToken ct = default);
+    Task<IReadOnlyList<OrderDto>> GetOrdersByCustomerAsync(CancellationToken ct = default);
+    Task<OrderDetailDto?> GetOrderByIdAsync(Guid orderId, CancellationToken ct = default);
 }

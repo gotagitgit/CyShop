@@ -18,4 +18,8 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Cyshop.Common\Cyshop.Common.csproj" />
+  </ItemGroup>
+
 </Project>

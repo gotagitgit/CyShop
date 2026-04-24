@@ -5,6 +5,7 @@ using Cyshop.Common.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Orders.Infrastructure.Data;
 using StackExchange.Redis;
 
 namespace CyShop.DbMigrator;
@@ -12,6 +13,7 @@ namespace CyShop.DbMigrator;
 public class MigrationRunner(
     CatalogDbContext catalogContext,
     CustomersDbContext customersContext,
+    OrdersDbContext ordersContext,
     AuthSeeder authSeeder,
     CatalogApiSeeder catalogApiSeeder,
     CustomersDataSeeder customersSeeder,
@@ -35,6 +37,7 @@ public class MigrationRunner(
 
         await MigrateCatalogAsync(ct);
         await MigrateCustomersAsync(ct);
+        await MigrateOrdersAsync(ct);
         await SeedCustomersAsync(ct);
         await authSeeder.SeedAsync(ct);
         await catalogApiSeeder.SeedAsync(ct);
@@ -58,7 +61,11 @@ public class MigrationRunner(
         logger.LogInformation("[Override] Wiping Customers database...");
         await customersContext.Database.EnsureDeletedAsync(ct);
 
-        // 4. Flush Redis basket database (db 0 — default, matching Basket.API's redis.GetDatabase())
+        // 4. Wipe Orders DB tables
+        logger.LogInformation("[Override] Wiping Orders database...");
+        await ordersContext.Database.EnsureDeletedAsync(ct);
+
+        // 5. Flush Redis basket database (db 0 — default, matching Basket.API's redis.GetDatabase())
         logger.LogInformation("[Override] Flushing Redis basket database...");
         var endpoints = redis.GetEndPoints();
         foreach (var endpoint in endpoints)
@@ -67,7 +74,7 @@ public class MigrationRunner(
             await server.FlushDatabaseAsync(0);
         }
 
-        // 5. Delete all objects in storage bucket
+        // 6. Delete all objects in storage bucket
         var bucketName = configuration["Storage:BucketName"] ?? "catalog-images";
         logger.LogInformation("[Override] Deleting all objects in bucket '{Bucket}'...", bucketName);
         await storageService.DeleteAllObjectsAsync(bucketName, ct);
@@ -87,6 +94,13 @@ public class MigrationRunner(
         logger.LogInformation("[Customers] Applying migrations...");
         await customersContext.Database.MigrateAsync(ct);
         logger.LogInformation("[Customers] Migrations applied.");
+    }
+
+    private async Task MigrateOrdersAsync(CancellationToken ct)
+    {
+        logger.LogInformation("[Orders] Applying migrations...");
+        await ordersContext.Database.MigrateAsync(ct);
+        logger.LogInformation("[Orders] Migrations applied.");
     }
 
     private async Task SeedCustomersAsync(CancellationToken ct)

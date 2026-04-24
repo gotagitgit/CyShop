@@ -32,6 +32,9 @@
     <Project Path="src/Storage/S3Client/S3Client.csproj" />
     <Project Path="src/Storage/Storage.Infrastructure/Storage.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="tests/Orders.API.Tests/Orders.API.Tests.csproj" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
     <File Path="Directory.Build.props" />
