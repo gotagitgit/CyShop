@@ -10,7 +10,7 @@ namespace Orders.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructureServices(
+    public static IServiceCollection AddOrdersInfrastructureServices(
         this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<OrdersDbContext>(options =>
@@ -18,7 +18,8 @@ public static class DependencyInjection
 
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<IIdempotencyRepository, IdempotencyRepository>();
-
+        services.AddScoped<IIntegrationEventLogRepository, IntegrationEventLogRepository>();
+        
         return services;
     }
 }
