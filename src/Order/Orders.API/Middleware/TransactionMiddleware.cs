@@ -61,6 +61,12 @@ public class TransactionMiddleware
                         await transaction.CommitAsync();
                         _logger.LogInformation("Transaction committed for {Method} {Path}",
                             context.Request.Method, context.Request.Path);
+
+                        if (bufferStream is not null)
+                        {
+                            bufferStream.Position = 0;
+                            await bufferStream.CopyToAsync(originalBody);
+                        }
                     }
                     else
                     {
@@ -75,13 +81,13 @@ public class TransactionMiddleware
                         context.Request.Method, context.Request.Path);
                     throw;
                 }
-            }
-
-            if (bufferStream is not null)
-            {
-                bufferStream.Position = 0;
-                await bufferStream.CopyToAsync(originalBody);
-                context.Response.Body = originalBody;
+                finally
+                {
+                    if (bufferStream is not null)
+                    {
+                        context.Response.Body = originalBody;
+                    }
+                }
             }
         });
     }
