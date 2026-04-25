@@ -1,6 +1,10 @@
 using Basket.API.Endpoints;
+using Basket.API.IntegrationEvents.EventHandling;
+using Basket.API.IntegrationEvents.Events;
 using Basket.API.Repositories;
 using CyShop.ServiceDefaults;
+using EventBus.Abstractions;
+using RabbitMQEventBus;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +22,9 @@ builder.Services.AddScoped<IBasketRepository, RedisBasketRepository>();
 builder.AddDefaultAuthentication();
 
 builder.AddDefaultCors();
+
+builder.AddRabbitMqEventBus("eventbus")
+    .AddSubscription<OrderStartedIntegrationEvent, OrderStartedIntegrationEventHandler>();
 
 var app = builder.Build();
 

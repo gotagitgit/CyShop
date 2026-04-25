@@ -7,6 +7,7 @@ import {
   setSelectedAddressId,
 } from '../store/checkoutSlice';
 import { createOrder } from '../store/ordersSlice';
+import { fetchBasket } from '../store/basketSlice';
 import { fetchProfile } from '../store/customerSlice';
 
 function CheckoutContent() {
@@ -62,6 +63,7 @@ function CheckoutContent() {
           idempotencyKey: idempotencyKeyRef.current,
         }),
       ).unwrap();
+      dispatch(fetchBasket());
       navigate('/orders');
     } catch (err: unknown) {
       const message =

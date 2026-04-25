@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Orders.Application.Interfaces;
 using Orders.Infrastructure.Data;
 
 namespace Orders.API.Middleware;
@@ -14,7 +15,7 @@ public class TransactionMiddleware
         _logger = logger;
     }
 
-    public async Task InvokeAsync(HttpContext context, OrdersDbContext dbContext)
+    public async Task InvokeAsync(HttpContext context, OrdersDbContext dbContext, IIntegrationEventService integrationEventService)
     {
         if (HttpMethods.IsGet(context.Request.Method) || HttpMethods.IsHead(context.Request.Method))
         {
@@ -61,6 +62,8 @@ public class TransactionMiddleware
                         await transaction.CommitAsync();
                         _logger.LogInformation("Transaction committed for {Method} {Path}",
                             context.Request.Method, context.Request.Path);
+
+                        await integrationEventService.PublishPendingEventsAsync();
 
                         if (bufferStream is not null)
                         {

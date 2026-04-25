@@ -18,6 +18,10 @@
     <Project Path="src/Customers/Customers.Domain/Customers.Domain.csproj" />
     <Project Path="src/Customers/Customers.Infrastructure/Customers.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/Messaging/">
+    <Project Path="src/Messaging/EventBus/EventBus.csproj" Id="5ea17181-ce2f-49cf-9df0-cfba8d1e7e40" />
+    <Project Path="src/Messaging/RabbitMQEventBus/RabbitMQEventBus.csproj" Id="6dc5a299-3e8d-4d8e-8ed1-15fd940fd833" />
+  </Folder>
   <Folder Name="/Orders/">
     <Project Path="src/Order/Orders.API/Orders.API.csproj" />
     <Project Path="src/Order/Orders.Application/Orders.Application.csproj" />

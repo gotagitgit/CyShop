@@ -1,6 +1,6 @@
 using EventBus.Events;
 
-namespace Orders.Application.IntegrationEvents.Events;
+namespace Basket.API.IntegrationEvents.Events;
 
 public record OrderStartedIntegrationEvent(
     Guid OrderId,

@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Common\CyShop.ServiceDefaults\CyShop.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\..\Messaging\RabbitMQEventBus\RabbitMQEventBus.csproj" />
     <ProjectReference Include="..\Orders.Infrastructure\Orders.Infrastructure.csproj" />
   </ItemGroup>
 

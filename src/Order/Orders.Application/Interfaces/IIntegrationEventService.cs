@@ -1,4 +1,4 @@
-using Orders.Application.IntegrationEvents;
+using EventBus.Events;
 
 namespace Orders.Application.Interfaces;
 
