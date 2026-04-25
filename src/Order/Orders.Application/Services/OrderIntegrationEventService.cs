@@ -1,13 +1,22 @@
+using EventBus.Abstractions;
 using EventBus.Events;
 using Microsoft.Extensions.Logging;
+using Orders.Application.IntegrationEvents;
 using Orders.Application.Interfaces;
 
 namespace Orders.Application.Services;
 
 public class OrderingIntegrationEventService(
     IIntegrationEventLogRepository eventLogRepository,
+    IEventBus eventBus,
     ILogger<OrderingIntegrationEventService> logger) : IIntegrationEventService
 {
+    private static readonly Dictionary<string, Type> EventTypes = new()
+    {
+        [typeof(IntegrationEvents.Events.OrderStartedIntegrationEvent).FullName!] =
+            typeof(IntegrationEvents.Events.OrderStartedIntegrationEvent)
+    };
+
     public async Task AddAndSaveEventAsync(IntegrationEvent evt, CancellationToken ct = default)
     {
         logger.LogInformation("Saving integration event {EventId} ({EventType}) to outbox",
@@ -29,8 +38,15 @@ public class OrderingIntegrationEventService(
                 logger.LogInformation("Publishing integration event {EventId} ({EventType})",
                     entry.EventId, entry.EventTypeName);
 
-                // TODO: Publish to your message broker here (RabbitMQ, Azure Service Bus, etc.)
-                // await _messageBroker.PublishAsync(entry.DeserializeEvent(eventType), ct);
+                if (!EventTypes.TryGetValue(entry.EventTypeName, out var eventType))
+                {
+                    logger.LogWarning("Unknown event type {EventType}, skipping", entry.EventTypeName);
+                    await eventLogRepository.MarkEventAsFailedAsync(entry.EventId, ct);
+                    continue;
+                }
+
+                var integrationEvent = entry.DeserializeEvent(eventType);
+                await eventBus.PublishAsync(integrationEvent);
 
                 await eventLogRepository.MarkEventAsPublishedAsync(entry.EventId, ct);
             }

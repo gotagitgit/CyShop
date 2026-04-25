@@ -5,6 +5,7 @@ using Orders.Infrastructure;
 using Orders.Infrastructure.Data;
 using CyShop.ServiceDefaults;
 using Microsoft.EntityFrameworkCore;
+using RabbitMQEventBus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,8 @@ builder.AddServiceDefaults();
 builder.Services.AddOpenApi();
 builder.Services.AddApplicationServices();
 builder.Services.AddOrdersInfrastructureServices(builder.Configuration);
+
+builder.AddRabbitMqEventBus("eventbus");
 
 builder.AddDefaultCors();
 
