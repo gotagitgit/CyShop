@@ -27,7 +27,7 @@ public class TransactionOptionsTests
         var middleware = new TransactionMiddleware(next, helper.MockLogger.Object);
 
         // Act
-        await middleware.InvokeAsync(context, helper.MockDbContext.Object);
+        await middleware.InvokeAsync(context, helper.MockDbContext.Object, helper.MockIntegrationEventService.Object);
 
         // Assert
         Assert.True(nextCalled);
@@ -59,7 +59,7 @@ public class TransactionOptionsTests
         var middleware = new TransactionMiddleware(next, helper.MockLogger.Object);
 
         // Act
-        await middleware.InvokeAsync(context, helper.MockDbContext.Object);
+        await middleware.InvokeAsync(context, helper.MockDbContext.Object, helper.MockIntegrationEventService.Object);
 
         // Assert — response body was NOT replaced with a MemoryStream
         Assert.Same(originalBody, bodyDuringPipeline);
@@ -91,7 +91,7 @@ public class TransactionOptionsTests
         var middleware = new TransactionMiddleware(next, helper.MockLogger.Object);
 
         // Act
-        await middleware.InvokeAsync(context, helper.MockDbContext.Object);
+        await middleware.InvokeAsync(context, helper.MockDbContext.Object, helper.MockIntegrationEventService.Object);
 
         // Assert — response body WAS replaced with a MemoryStream during pipeline
         Assert.IsType<MemoryStream>(bodyDuringPipeline);
@@ -118,7 +118,7 @@ public class TransactionOptionsTests
         var middleware = new TransactionMiddleware(next, helper.MockLogger.Object);
 
         // Act
-        await middleware.InvokeAsync(context, helper.MockDbContext.Object);
+        await middleware.InvokeAsync(context, helper.MockDbContext.Object, helper.MockIntegrationEventService.Object);
 
         // Assert — default behavior: buffered + transaction
         Assert.IsType<MemoryStream>(bodyDuringPipeline);
@@ -143,7 +143,7 @@ public class TransactionOptionsTests
         var middleware = new TransactionMiddleware(next, helper.MockLogger.Object);
 
         // Act
-        await middleware.InvokeAsync(context, helper.MockDbContext.Object);
+        await middleware.InvokeAsync(context, helper.MockDbContext.Object, helper.MockIntegrationEventService.Object);
 
         // Assert — transaction rolled back, no buffering
         helper.MockTransaction.Verify(t => t.RollbackAsync(It.IsAny<CancellationToken>()), Times.Once);
