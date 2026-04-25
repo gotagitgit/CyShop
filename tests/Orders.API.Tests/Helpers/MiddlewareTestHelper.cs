@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Orders.API.Middleware;
+using Orders.Application.Interfaces;
 using Orders.Infrastructure.Data;
 
 namespace Orders.API.Tests.Helpers;
@@ -19,6 +20,7 @@ public class MiddlewareTestHelper
     public Mock<DatabaseFacade> MockDatabase { get; }
     public Mock<IDbContextTransaction> MockTransaction { get; }
     public Mock<ILogger<Middleware.TransactionMiddleware>> MockLogger { get; }
+    public Mock<IIntegrationEventService> MockIntegrationEventService { get; }
     public FakeExecutionStrategy Strategy { get; }
 
     public MiddlewareTestHelper()
@@ -31,6 +33,7 @@ public class MiddlewareTestHelper
         MockTransaction = new Mock<IDbContextTransaction>();
         Strategy = new FakeExecutionStrategy();
         MockLogger = new Mock<ILogger<Middleware.TransactionMiddleware>>();
+        MockIntegrationEventService = new Mock<IIntegrationEventService>();
 
         // Wire up: DbContext.Database returns MockDatabase
         MockDbContext.Setup(c => c.Database).Returns(MockDatabase.Object);
