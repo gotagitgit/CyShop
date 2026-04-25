@@ -7,6 +7,8 @@ using Microsoft.Extensions.Logging;
 using Auth.Infrastructure;
 using Storage.Infrastructure;
 using Orders.Infrastructure;
+using SearchServices;
+using SearchServices.Settings;
 using StackExchange.Redis;
 
 var options = CommandLineOptions.Parse(args);
@@ -24,10 +26,15 @@ services.AddCustomersInfrastructureServices(configuration);
 services.AddAuthInfrastructure(configuration);
 services.AddStorageInfrastructure(configuration);
 services.AddOrdersInfrastructureServices(configuration);
+services.Configure<SearchSettings>(s =>
+    s.SearchAddress = configuration["OpenSearch:Endpoint"] ?? "http://localhost:9200");
+services.Register();
 services.AddSingleton(options);
 services.AddScoped<MigrationRunner>();
 services.AddScoped<AuthSeeder>();
 services.AddSingleton<StorageSeeder>();
+services.AddScoped<OpenSearchSeeder>();
+services.AddScoped<OpenSearchModelSetup>();
 
 var redisConnectionString = configuration.GetConnectionString("Redis") ?? "localhost:6379";
 services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect($"{redisConnectionString},allowAdmin=true"));

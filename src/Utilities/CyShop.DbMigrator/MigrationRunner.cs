@@ -18,6 +18,7 @@ public class MigrationRunner(
     CatalogApiSeeder catalogApiSeeder,
     CustomersDataSeeder customersSeeder,
     StorageSeeder storageSeeder,
+    OpenSearchSeeder openSearchSeeder,
     IIdentityProviderService identityProviderService,
     IStorageService storageService,
     IConnectionMultiplexer redis,
@@ -42,6 +43,7 @@ public class MigrationRunner(
         await authSeeder.SeedAsync(ct);
         await catalogApiSeeder.SeedAsync(ct);
         await SeedStorageAsync();
+        await SeedOpenSearchAsync(ct);
 
         logger.LogInformation("All migrations and seeding completed.");
     }
@@ -115,5 +117,12 @@ public class MigrationRunner(
         logger.LogInformation("[Storage] Seeding images...");
         await storageSeeder.SeedAsync();
         logger.LogInformation("[Storage] Image seeding complete.");
+    }
+
+    private async Task SeedOpenSearchAsync(CancellationToken ct)
+    {
+        logger.LogInformation("[OpenSearch] Seeding...");
+        await openSearchSeeder.SeedAsync(ct);
+        logger.LogInformation("[OpenSearch] Seeding complete.");
     }
 }
