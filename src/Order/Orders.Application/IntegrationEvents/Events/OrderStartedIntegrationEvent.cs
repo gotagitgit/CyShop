@@ -1,3 +1,5 @@
+using EventBus.Events;
+
 namespace Orders.Application.IntegrationEvents.Events;
 
 public record OrderStartedIntegrationEvent(

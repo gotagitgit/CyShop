@@ -1,5 +1,5 @@
+using EventBus.Events;
 using Microsoft.Extensions.Logging;
-using Orders.Application.IntegrationEvents;
 using Orders.Application.Interfaces;
 
 namespace Orders.Application.Services;

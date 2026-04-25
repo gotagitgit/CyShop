@@ -1,3 +1,4 @@
+using EventBus.Events;
 using Microsoft.EntityFrameworkCore;
 using Orders.Application.IntegrationEvents;
 using Orders.Application.Interfaces;
