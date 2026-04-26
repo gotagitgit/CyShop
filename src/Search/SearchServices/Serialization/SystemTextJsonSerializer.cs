@@ -7,11 +7,13 @@ internal sealed class SystemTextJsonSerializer : IOpenSearchSerializer
 {
     public static readonly SystemTextJsonSerializer Instance = new();
 
-    private static readonly JsonSerializerOptions Options = new()
+    internal static readonly JsonSerializerOptions SerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
     };
+
+    private static readonly JsonSerializerOptions Options = SerializerOptions;
 
     public T Deserialize<T>(Stream stream)
     {

@@ -74,7 +74,7 @@ internal partial class OpenSearchClientWrapper
             "/_plugins/_ml/models/_search",
             cancellationToken,
             PostData.Serializable(searchRequest));
-
+        
         return MLModelSearchResponse.Parse(response);
     }
 

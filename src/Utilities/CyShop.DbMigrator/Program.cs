@@ -27,13 +27,17 @@ services.AddAuthInfrastructure(configuration);
 services.AddStorageInfrastructure(configuration);
 services.AddOrdersInfrastructureServices(configuration);
 services.Configure<SearchSettings>(s =>
-    s.SearchAddress = configuration["OpenSearch:Endpoint"] ?? "http://localhost:9200");
+{
+    s.SearchAddress = configuration["OpenSearch:Endpoint"] ?? "http://localhost:9200";
+    s.IngestPipeline = configuration["OpenSearch:IngestPipeline"] ?? "catalog-neural-pipeline";
+    s.EmbeddingDimension = int.Parse(configuration["OpenSearch:EmbeddingDimension"] ?? "384");
+});
 services.Register();
 services.AddSingleton(options);
 services.AddScoped<MigrationRunner>();
 services.AddScoped<AuthSeeder>();
 services.AddSingleton<StorageSeeder>();
-services.AddScoped<OpenSearchSeeder>();
+services.AddHttpClient<OpenSearchSeeder>();
 services.AddScoped<OpenSearchModelSetup>();
 
 var redisConnectionString = configuration.GetConnectionString("Redis") ?? "localhost:6379";

@@ -27,16 +27,19 @@ public static class SearchServiceDependencyInjection
         });
         services.AddScoped(ioc => ioc.GetRequiredService<IOpenSearchClient>().LowLevel);
         services.AddScoped<IOpenSearchClientWrapper, OpenSearchClientWrapper>();
+        services.AddScoped<IOpenSearchIndexClientWrapper, OpenSearchIndexClientWrapper>();
     }
 
     private static void RegisterServices(this IServiceCollection services)
     {
         services.AddScoped<IOpenSearchModelService, OpenSearchModelService>();
         services.AddScoped<IOpenSearchClusterService, OpenSearchClusterService>();
+        services.AddScoped<IOpenSearchIndexService, OpenSearchIndexService>();
     }
 
     private static void RegisterFactories(this IServiceCollection services)
     {
         services.AddScoped<IOpenSearchClientFactory, OpenSearchClientFactory>();
+        services.AddSingleton<IIndexMappingFactory<Models.CatalogIndexDocument>, CatalogIndexMappingFactory>();
     }
 }
