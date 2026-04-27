@@ -1,5 +1,5 @@
 using Chat.Domain.Interfaces;
-using Chat.Infrastructure.Plugins;
+using Chat.Infrastructure.Tools;
 using Chat.Infrastructure.Services;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;

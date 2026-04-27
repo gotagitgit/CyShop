@@ -13,12 +13,8 @@ public class ChatService(IChatCompletionService completionService) : IChatServic
             .Select(m => new ChatMessage(m.Role, m.Content))
             .ToList();
 
-        var (answer, products) = await completionService.GetResponseAsync(history, request.Query, ct);
+        var answer = await completionService.GetResponseAsync(history, request.Query, ct);
 
-        var productDtos = products
-            .Select(p => new ChatProductDto(p.Id, p.Name, p.Price))
-            .ToList();
-
-        return new ChatResponse(answer, productDtos, null);
+        return new ChatResponse(answer);
     }
 }

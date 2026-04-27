@@ -1,6 +1,5 @@
-using Chat.Domain.Entities;
 using Chat.Domain.Interfaces;
-using Chat.Infrastructure.Plugins;
+using Chat.Infrastructure.Tools;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -41,7 +40,7 @@ public class OllamaChatCompletionService : IChatCompletionService
             .Build();
     }
 
-    public async Task<(string Answer, IReadOnlyList<ChatProduct> Products)> GetResponseAsync(
+    public async Task<string> GetResponseAsync(
         IReadOnlyList<DomainChatMessage> history,
         string query,
         CancellationToken ct = default)
@@ -74,9 +73,6 @@ public class OllamaChatCompletionService : IChatCompletionService
         _logger.LogInformation("LLM response: {Answer}",
             answer.Length > 300 ? answer[..300] + "..." : answer);
 
-        var products = _tools.OfType<SearchCatalogTool>()
-            .FirstOrDefault()?.LastResults ?? [];
-
-        return (answer, products);
+        return answer;
     }
 }
