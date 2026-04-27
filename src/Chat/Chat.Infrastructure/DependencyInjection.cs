@@ -1,5 +1,5 @@
 using Chat.Domain.Interfaces;
-using Chat.Infrastructure.Adapters;
+using Chat.Infrastructure.Plugins;
 using Chat.Infrastructure.Services;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,9 +25,6 @@ public static class DependencyInjection
         services.Configure<SearchSettings>(config.GetSection("Search"));
         services.AddSearchServices();
 
-        // Domain port: ISearchCatalogService → OpenSearchCatalogService
-        services.AddScoped<ISearchCatalogService, OpenSearchCatalogService>();
-
         // Ollama IChatClient — singleton, stateless HTTP client wrapper
         var timeoutSeconds = int.TryParse(chatSection["TimeoutSeconds"], out var t) ? t : 120;
         var ollamaEndpoint = chatSection["OllamaEndpoint"] ?? "http://localhost:11434";
@@ -40,8 +37,12 @@ public static class DependencyInjection
         };
         services.AddSingleton<IChatClient>(new OllamaSharp.OllamaApiClient(httpClient, ollamaModel));
 
-        // Domain port: IChatCompletionService → OllamaChatCompletionAdapter (scoped — one per request)
-        services.AddScoped<Chat.Domain.Interfaces.IChatCompletionService, OllamaChatCompletionAdapter>();
+        // Chat tools — add new IChatTool implementations here for future capabilities
+        services.AddScoped<IChatTool, SearchCatalogTool>();
+        // services.AddScoped<IChatTool, AddToCartTool>();
+
+        // Domain port: IChatCompletionService → OllamaChatCompletionService (scoped — one per request)
+        services.AddScoped<IChatCompletionService, OllamaChatCompletionService>();
 
         return services;
     }
