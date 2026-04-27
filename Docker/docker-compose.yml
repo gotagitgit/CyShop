@@ -1,19 +1,18 @@
 name: cyShop
 
 services:
-  catalogdb:
+  cyShopDB:
     image: postgres:17.6
-    container_name: catalogdb
+    container_name: cyShopDB
     environment:
-      POSTGRES_DB: catalogdb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
     volumes:
-      - catalogdb-data:/var/lib/postgresql/data
+      - cyShopDB-data:/var/lib/postgresql/data
 
-  basketcache:
+  redis:
     image: redis:8.2
     container_name: redis-basketcache
     ports:
@@ -57,10 +56,45 @@ services:
       - "9001:9001"
     volumes:
       - minio-data:/data
+  
+  cyShop-opensearch:
+    image: opensearchproject/opensearch:2.17.1
+    container_name: cyShop-opensearch
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - DISABLE_SECURITY_PLUGIN=true
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=admin
+    networks:
+      - cyshop-network
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+      - ../data/opensearch:/tmp/models
+    restart: unless-stopped
+
+  cyShop-opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.17.1
+    container_name: cyshop-opensearch-dashboards
+    ports:
+      - "5601:5601"
+    environment:
+      - OPENSEARCH_HOSTS=["http://cyShop-opensearch:9200"]
+      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
+    networks:
+      - cyshop-network
+    depends_on:
+      - cyShop-opensearch
+    restart: unless-stopped
+
+networks:
+  cyshop-network:
+    driver: bridge
 
 volumes:
-  catalogdb-data:
+  cyShopDB-data:
   basketcache-data:
   keycloak-data:
   rabbitmq-data:
   minio-data:
+  opensearch-data:

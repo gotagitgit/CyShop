@@ -48,5 +48,8 @@
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.0" />
     <PackageVersion Include="FsCheck.Xunit" Version="3.1.0" />
     <PackageVersion Include="Moq" Version="4.20.72" />
+    <!-- OpenSearch -->
+    <PackageVersion Include="OpenSearch.Client" Version="1.8.0" />
+    <PackageVersion Include="OpenSearch.Net" Version="1.8.0" />
   </ItemGroup>
 </Project>

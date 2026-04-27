@@ -39,6 +39,7 @@
     <ProjectReference Include="..\..\Order\Orders.Infrastructure\Orders.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Security\Auth.Infrastructure\Auth.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Storage\Storage.Infrastructure\Storage.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Search\SearchServices\SearchServices.csproj" />
   </ItemGroup>
 
   <ItemGroup>

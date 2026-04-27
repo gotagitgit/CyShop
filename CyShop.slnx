@@ -28,6 +28,9 @@
     <Project Path="src/Order/Orders.Domain/Orders.Domain.csproj" />
     <Project Path="src/Order/Orders.Infrastructure/Orders.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/Search/">
+    <Project Path="src/Search/SearchServices/SearchServices.csproj" />
+  </Folder>
   <Folder Name="/Security/">
     <Project Path="src/Security/Auth.Infrastructure/Auth.Infrastructure.csproj" Id="fa31b44a-2fc8-4d3e-89c4-4f208084abda" />
     <Project Path="src/Security/KeycloakClient/KeycloakClient.csproj" />
