@@ -9,7 +9,7 @@ namespace SearchServices;
 
 public static class SearchServiceDependencyInjection
 {
-    public static IServiceCollection Register(this IServiceCollection services)
+    public static IServiceCollection AddSearchServices(this IServiceCollection services)
     {
         RegisterSearchClients(services);
         RegisterServices(services);

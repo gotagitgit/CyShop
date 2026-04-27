@@ -116,6 +116,7 @@ describe('apiClient', () => {
         status: 200,
         statusText: 'OK',
         json: vi.fn().mockResolvedValue({ data: 'ok' }),
+        text: vi.fn().mockResolvedValue(JSON.stringify({ data: 'ok' })),
       } as unknown as Response;
 
       vi.spyOn(globalThis, 'fetch')
@@ -184,6 +185,7 @@ describe('apiClient', () => {
         ok: true,
         status: 204,
         statusText: 'No Content',
+        text: vi.fn().mockResolvedValue(''),
       } as unknown as Response;
 
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(noContentResponse);

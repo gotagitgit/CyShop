@@ -4,6 +4,7 @@ import { useAuthStatus } from '../auth/useAuthStatus';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import { fetchBasket } from '../store/basketSlice';
 import AvatarDropdown from './AvatarDropdown';
+import ChatWidget from './ChatWidget';
 
 export default function Layout() {
   const { isAuthenticated } = useAuthStatus();
@@ -32,6 +33,7 @@ export default function Layout() {
       <main>
         <Outlet />
       </main>
+      <ChatWidget />
     </>
   );
 }

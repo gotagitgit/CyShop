@@ -12,9 +12,12 @@ var basketApi = builder.AddProject<Projects.Basket_API>("basket-api")
        .WithReference(redis)
        .WithReference(keycloak);
 
+var chatApi = builder.AddProject<Projects.Chat_API>("chat-api");
+
 builder.AddViteApp("cyshop-web", "../../CyShop.Web")
        .WithReference(catalogApi)
-       .WithReference(basketApi);
+       .WithReference(basketApi)
+       .WithReference(chatApi);
 
 builder.AddProject<Projects.Customers_API>("customers-api");
 

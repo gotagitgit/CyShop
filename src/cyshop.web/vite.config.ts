@@ -7,6 +7,7 @@ const catalogTarget = process.env.services__catalog_api__https__0 ?? process.env
 const basketTarget = process.env.services__basket_api__https__0 ?? process.env.services__basket_api__http__0 ?? 'https://localhost:7097'
 const customersTarget = process.env.services__customers_api__https__0 ?? process.env.services__customers_api__http__0 ?? 'https://localhost:7261'
 const ordersTarget = process.env.services__orders_api__https__0 ?? process.env.services__orders_api__http__0 ?? 'https://localhost:7042'
+const chatTarget = process.env.services__chat_api__https__0 ?? process.env.services__chat_api__http__0 ?? 'https://localhost:62153'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -30,6 +31,11 @@ export default defineConfig({
       },
       '/api/orders': {
         target: ordersTarget,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/chat': {
+        target: chatTarget,
         changeOrigin: true,
         secure: false,
       },

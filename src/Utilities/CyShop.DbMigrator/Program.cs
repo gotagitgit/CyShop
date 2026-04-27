@@ -32,7 +32,7 @@ services.Configure<SearchSettings>(s =>
     s.IngestPipeline = configuration["OpenSearch:IngestPipeline"] ?? "catalog-neural-pipeline";
     s.EmbeddingDimension = int.Parse(configuration["OpenSearch:EmbeddingDimension"] ?? "384");
 });
-services.Register();
+services.AddSearchServices();
 services.AddSingleton(options);
 services.AddScoped<MigrationRunner>();
 services.AddScoped<AuthSeeder>();

@@ -8,6 +8,12 @@
     <Project Path="src/Catalogs/Catalog.Domain/Catalog.Domain.csproj" />
     <Project Path="src/Catalogs/Catalog.Infrastructure/Catalog.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/Chat/">
+    <Project Path="src/Chat/Chat.API/Chat.API.csproj" />
+    <Project Path="src/Chat/Chat.Application/Chat.Application.csproj" />
+    <Project Path="src/Chat/Chat.Domain/Chat.Domain.csproj" />
+    <Project Path="src/Chat/Chat.Infrastructure/Chat.Infrastructure.csproj" />
+  </Folder>
   <Folder Name="/Common/">
     <Project Path="src/Common/Cyshop.Common/Cyshop.Common.csproj" Id="e038a75d-445e-4f52-9826-af46e597e13c" />
     <Project Path="src/Common/CyShop.ServiceDefaults/CyShop.ServiceDefaults.csproj" />

@@ -8,6 +8,7 @@ namespace SearchServices.Services;
 
 internal sealed class OpenSearchIndexService(
     IOpenSearchIndexClientWrapper wrapper,
+    IOpenSearchClientWrapper clientWrapper,
     IIndexMappingFactory<CatalogIndexDocument> catalogMappingFactory,
     IOptions<SearchSettings> options) : IOpenSearchIndexService
 {
@@ -48,5 +49,28 @@ internal sealed class OpenSearchIndexService(
         CancellationToken cancellationToken = default)
     {
         return await wrapper.BulkIndexAsync(indexName, documents, d => d.Id, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<CatalogIndexDocument>> SearchAsync(
+        string query,
+        int maxResults = 5,
+        CancellationToken cancellationToken = default)
+    {
+        var settings = options.Value;
+        var modelId = await ResolveModelIdAsync(settings, cancellationToken);
+        return await wrapper.SearchAsync("catalog", query, settings.SearchPipeline, modelId, maxResults, cancellationToken);
+    }
+
+    private async Task<string> ResolveModelIdAsync(SearchSettings settings, CancellationToken ct)
+    {
+        var group = await clientWrapper.FindModelGroupAsync(settings.ModelGroupName, ct);
+        if (!group.IsSuccess)
+            throw new InvalidOperationException($"Model group '{settings.ModelGroupName}' not found in OpenSearch.");
+
+        var model = await clientWrapper.FindModelAsync(settings.ModelName, group.Id, ct);
+        if (!model.IsFound)
+            throw new InvalidOperationException($"Model '{settings.ModelName}' not found in group '{settings.ModelGroupName}'.");
+
+        return model.ModelId;
     }
 }

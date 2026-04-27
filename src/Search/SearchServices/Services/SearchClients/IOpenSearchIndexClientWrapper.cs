@@ -20,4 +20,12 @@ public interface IOpenSearchIndexClientWrapper
         IReadOnlyList<T> documents,
         Func<T, string> idSelector,
         CancellationToken cancellationToken) where T : class;
+
+    Task<IReadOnlyList<CatalogIndexDocument>> SearchAsync(
+        string indexName,
+        string query,
+        string searchPipeline,
+        string modelId,
+        int maxResults,
+        CancellationToken cancellationToken);
 }
