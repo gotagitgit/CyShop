@@ -25,6 +25,7 @@ public interface IOpenSearchIndexClientWrapper
         string indexName,
         string query,
         string searchPipeline,
+        string modelId,
         int maxResults,
         CancellationToken cancellationToken);
 }

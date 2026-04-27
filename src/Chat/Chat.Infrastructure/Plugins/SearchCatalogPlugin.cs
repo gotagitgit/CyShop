@@ -7,9 +7,9 @@ using System.ComponentModel;
 
 public class SearchCatalogPlugin(ISearchCatalogService searchService)
 {
-    [KernelFunction, Description("Search the product catalog by natural language query")]
+    [KernelFunction, Description("Search the product catalog for a provided product description")]
     public async Task<IReadOnlyList<ChatProduct>> SearchCatalog(
-        [Description("The search query")] string query,
+        [Description("The product description for which to search")] string query,
         CancellationToken ct)
     {
         return await searchService.SearchAsync(query, ct);

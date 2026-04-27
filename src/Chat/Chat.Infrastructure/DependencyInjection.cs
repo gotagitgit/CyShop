@@ -1,15 +1,13 @@
-namespace Chat.Infrastructure;
-
 using Chat.Domain.Interfaces;
 using Chat.Infrastructure.Adapters;
-using Chat.Infrastructure.Plugins;
 using Chat.Infrastructure.Services;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.SemanticKernel;
 using SearchServices;
 using SearchServices.Settings;
+
+namespace Chat.Infrastructure;
 
 public static class DependencyInjection
 {
@@ -30,20 +28,19 @@ public static class DependencyInjection
         // Domain port: ISearchCatalogService → OpenSearchCatalogService
         services.AddScoped<ISearchCatalogService, OpenSearchCatalogService>();
 
-        // Register SearchCatalogPlugin as scoped so it can consume scoped ISearchCatalogService
-        services.AddScoped<SearchCatalogPlugin>();
+        // Ollama IChatClient — singleton, stateless HTTP client wrapper
+        var timeoutSeconds = int.TryParse(chatSection["TimeoutSeconds"], out var t) ? t : 120;
+        var ollamaEndpoint = chatSection["OllamaEndpoint"] ?? "http://localhost:11434";
+        var ollamaModel = chatSection["ModelName"] ?? "qwen3.5:9b";
 
-        // Semantic Kernel + Ollama
-        var kernelBuilder = services.AddKernel();
-        kernelBuilder.AddOllamaChatCompletion(
-            modelId: chatSection["ModelName"] ?? "llama3.2:1b",
-            endpoint: new Uri(chatSection["OllamaEndpoint"] ?? "http://localhost:11434"));
+        var httpClient = new HttpClient
+        {
+            BaseAddress = new Uri(ollamaEndpoint),
+            Timeout = TimeSpan.FromSeconds(timeoutSeconds)
+        };
+        services.AddSingleton<IChatClient>(new OllamaSharp.OllamaApiClient(httpClient, ollamaModel));
 
-        // Register the plugin as a scoped KernelPlugin so it resolves within request scope
-        services.AddScoped(sp =>
-            KernelPluginFactory.CreateFromObject(sp.GetRequiredService<SearchCatalogPlugin>(), "SearchCatalog"));
-
-        // Domain port: IChatCompletionService → OllamaChatCompletionAdapter
+        // Domain port: IChatCompletionService → OllamaChatCompletionAdapter (scoped — one per request)
         services.AddScoped<Chat.Domain.Interfaces.IChatCompletionService, OllamaChatCompletionAdapter>();
 
         return services;

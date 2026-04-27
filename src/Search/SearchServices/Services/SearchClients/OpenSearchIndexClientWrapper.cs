@@ -2,6 +2,7 @@ using System.Text.Json;
 using OpenSearch.Client;
 using OpenSearch.Net;
 using SearchServices.Models;
+using SearchServices.Serialization;
 
 namespace SearchServices.Services.SearchClients;
 
@@ -70,6 +71,7 @@ internal sealed class OpenSearchIndexClientWrapper(IOpenSearchClient client) : I
         string indexName,
         string query,
         string searchPipeline,
+        string modelId,
         int maxResults,
         CancellationToken cancellationToken)
     {
@@ -83,7 +85,7 @@ internal sealed class OpenSearchIndexClientWrapper(IOpenSearchClient client) : I
                     queries = new object[]
                     {
                         new { match = new { nameDescription = query } },
-                        new { neural = new { nameDescription_embedding = new { query_text = query, k = maxResults } } }
+                        new { neural = new { embedding = new { query_text = query, model_id = modelId, k = maxResults } } }
                     }
                 }
             }
@@ -91,9 +93,10 @@ internal sealed class OpenSearchIndexClientWrapper(IOpenSearchClient client) : I
 
         var response = await client.LowLevel.DoRequestAsync<StringResponse>(
             OpenSearch.Net.HttpMethod.POST,
-            $"/{indexName}/_search?search_pipeline={Uri.EscapeDataString(searchPipeline)}",
+            $"/{indexName}/_search",
             cancellationToken,
-            PostData.Serializable(body));
+            SerializeBody(body),
+            new SearchRequestParameters { QueryString = { { "search_pipeline", searchPipeline } } });
 
         if (!response.Success)
             throw new InvalidOperationException($"OpenSearch search failed: {response.DebugInformation}");
@@ -111,5 +114,12 @@ internal sealed class OpenSearchIndexClientWrapper(IOpenSearchClient client) : I
         }
 
         return documents;
+    }
+
+    private static PostData SerializeBody<T>(T data)
+    {
+        using var ms = new MemoryStream();
+        SystemTextJsonSerializer.Instance.Serialize(data, ms);
+        return PostData.Bytes(ms.ToArray());
     }
 }

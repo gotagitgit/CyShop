@@ -1,90 +1,99 @@
-namespace Chat.Infrastructure.Adapters;
-
+using System.ComponentModel;
 using Chat.Domain.Entities;
+using Chat.Domain.Interfaces;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
+using AiChatMessage = Microsoft.Extensions.AI.ChatMessage;
+using AiChatRole = Microsoft.Extensions.AI.ChatRole;
+using ChatMessage = Chat.Domain.Entities.ChatMessage;
 
-public class OllamaChatCompletionAdapter(
-    Kernel kernel,
-    Microsoft.SemanticKernel.ChatCompletion.IChatCompletionService skChatCompletion,
-    IEnumerable<KernelPlugin> plugins,
-    ILogger<OllamaChatCompletionAdapter> logger,
-    IOptions<ChatSettings> settings) : Chat.Domain.Interfaces.IChatCompletionService
+namespace Chat.Infrastructure.Adapters;
+
+public class OllamaChatCompletionAdapter : IChatCompletionService
 {
+    private readonly IChatClient _chatClient;
+    private readonly ILogger<OllamaChatCompletionAdapter> _logger;
+    private readonly ISearchCatalogService _searchService;
+    private IReadOnlyList<ChatProduct> _lastSearchResults = [];
+
     private const string SystemPrompt = """
-        You are a shopping assistant for CyShop, an online store. You MUST use the SearchCatalog function to find products.
+        You are a shopping assistant for CyShop, an online store that sells clothing and equipment for outdoor activities.
         RULES:
-        - ALWAYS call SearchCatalog when the user asks about products, categories, prices, or anything related to shopping.
+        - Use the SearchCatalog tool when the user asks about products, categories, or prices.
+        - If products are already in the conversation from a previous search, answer from context without searching again.
+        - When presenting products, always include their name and price.
+        - If no relevant products are found, let the user know politely.
         - NEVER make up or invent product information. Only reference products returned by SearchCatalog.
-        - If products are already in the conversation context from a previous SearchCatalog call, you may answer from context.
-        - When presenting products, include their name and price.
-        - If SearchCatalog returns no results, tell the user politely that no matching products were found.
-        - Do NOT provide generic advice or lists. You are a store assistant, not a general knowledge bot.
+        - If someone asks about something unrelated to CyShop, politely redirect them.
         """;
+
+    public OllamaChatCompletionAdapter(
+        IChatClient chatClient,
+        ISearchCatalogService searchService,
+        ILogger<OllamaChatCompletionAdapter> logger,
+        IOptions<ChatSettings> settings)
+    {
+        _searchService = searchService;
+        _logger = logger;
+
+        // Wrap the chat client with function invocation support
+        _chatClient = new ChatClientBuilder(chatClient)
+            .UseFunctionInvocation()
+            .Build();
+    }
 
     public async Task<(string Answer, IReadOnlyList<ChatProduct> Products)> GetResponseAsync(
         IReadOnlyList<ChatMessage> history,
         string query,
         CancellationToken ct = default)
     {
-        // Add scoped plugins to the kernel so the LLM can discover them
-        foreach (var plugin in plugins)
-        {
-            if (!kernel.Plugins.Contains(plugin))
-                kernel.Plugins.Add(plugin);
-        }
+        _lastSearchResults = [];
 
-        // Log registered plugins and their functions
-        logger.LogInformation("Kernel has {PluginCount} plugins registered", kernel.Plugins.Count);
-        foreach (var p in kernel.Plugins)
-        {
-            var funcNames = string.Join(", ", p.Select(f => f.Name));
-            logger.LogInformation("  Plugin '{PluginName}': [{Functions}]", p.Name, funcNames);
-        }
+        var searchTool = AIFunctionFactory.Create(SearchCatalogAsync, "SearchCatalog",
+            "Search the CyShop product catalog by natural language query. Returns product names and prices.");
 
-        var chatHistory = new ChatHistory(SystemPrompt);
+        var messages = new List<AiChatMessage>
+        {
+            new(AiChatRole.System, SystemPrompt)
+        };
 
         foreach (var msg in history)
         {
-            if (msg.Role == "user")
-                chatHistory.AddUserMessage(msg.Content);
-            else if (msg.Role == "assistant")
-                chatHistory.AddAssistantMessage(msg.Content);
+            var role = msg.Role == "user" ? AiChatRole.User : AiChatRole.Assistant;
+            messages.Add(new AiChatMessage(role, msg.Content));
         }
 
-        chatHistory.AddUserMessage(query);
+        messages.Add(new AiChatMessage(AiChatRole.User, query));
 
-        // Log what we're sending
-        logger.LogInformation("Sending chat with {MessageCount} messages, query: '{Query}'", chatHistory.Count, query);
+        _logger.LogInformation("Sending {Count} messages to LLM with SearchCatalog tool", messages.Count);
 
-        var executionSettings = new PromptExecutionSettings
+        var options = new ChatOptions
         {
-            FunctionChoiceBehavior = FunctionChoiceBehavior.Required()
+            Tools = [searchTool]
         };
-        executionSettings.ExtensionData ??= new Dictionary<string, object>();
-        executionSettings.ExtensionData["enable_thinking"] = false;
 
-        var result = await skChatCompletion.GetChatMessageContentAsync(
-            chatHistory, executionSettings, kernel, ct);
+        var response = await _chatClient.GetResponseAsync(messages, options, ct);
+        var answer = response.Text ?? string.Empty;
 
-        // Log the full chat history after completion (includes function calls/results)
-        logger.LogInformation("Chat completed. History now has {Count} messages", chatHistory.Count);
-        foreach (var msg in chatHistory)
-        {
-            logger.LogInformation("  [{Role}] {Content}", msg.Role, msg.Content?.Length > 200 ? msg.Content[..200] + "..." : msg.Content);
-        }
+        _logger.LogInformation("LLM response: {Answer}",
+            answer.Length > 300 ? answer[..300] + "..." : answer);
 
-        logger.LogInformation("Final answer: {Answer}", result.Content?.Length > 300 ? result.Content[..300] + "..." : result.Content);
-        
-        var products = ExtractProducts(chatHistory);
-
-        return (result.Content ?? string.Empty, products);
+        return (answer, _lastSearchResults);
     }
 
-    private static IReadOnlyList<ChatProduct> ExtractProducts(ChatHistory chatHistory)
+    [Description("Search the product catalog")]
+    private async Task<string> SearchCatalogAsync(
+        [Description("The search query")] string query,
+        CancellationToken ct = default)
     {
-        return [];
+        _logger.LogInformation("Tool called: SearchCatalog('{Query}')", query);
+        var products = await _searchService.SearchAsync(query, ct);
+        _lastSearchResults = products;
+
+        if (products.Count == 0)
+            return "No products found matching the query.";
+
+        return string.Join("\n", products.Select(p => $"- {p.Name}: ${p.Price}"));
     }
 }
