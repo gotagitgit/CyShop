@@ -51,5 +51,8 @@
     <!-- OpenSearch -->
     <PackageVersion Include="OpenSearch.Client" Version="1.8.0" />
     <PackageVersion Include="OpenSearch.Net" Version="1.8.0" />
+    <!-- Semantic Kernel -->
+    <PackageVersion Include="Microsoft.SemanticKernel" Version="1.54.0" />
+    <PackageVersion Include="Microsoft.SemanticKernel.Connectors.Ollama" Version="1.54.0-alpha" />
   </ItemGroup>
 </Project>

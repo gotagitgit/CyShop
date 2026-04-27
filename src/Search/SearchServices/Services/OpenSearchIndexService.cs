@@ -49,4 +49,13 @@ internal sealed class OpenSearchIndexService(
     {
         return await wrapper.BulkIndexAsync(indexName, documents, d => d.Id, cancellationToken);
     }
+
+    public async Task<IReadOnlyList<CatalogIndexDocument>> SearchAsync(
+        string query,
+        int maxResults = 5,
+        CancellationToken cancellationToken = default)
+    {
+        var settings = options.Value;
+        return await wrapper.SearchAsync("catalog", query, settings.SearchPipeline, maxResults, cancellationToken);
+    }
 }

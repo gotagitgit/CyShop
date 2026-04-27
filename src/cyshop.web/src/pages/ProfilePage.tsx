@@ -81,7 +81,7 @@ export default function ProfilePage() {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete your account?')) {
       const result = await dispatch(deleteProfile());
-      if (!result.meta.rejectedWithValue) {
+      if (result.meta.requestStatus !== 'rejected') {
         navigate('/');
       }
     }

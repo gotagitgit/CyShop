@@ -37,6 +37,9 @@ public static class AuthenticationExtensions
 
         if (!identitySection.Exists())
         {
+            // Always register authentication and authorization even without identity config
+            services.AddAuthentication();
+            services.AddAuthorization();
             return services;
         }
 
