@@ -56,7 +56,7 @@ describe('apiClient', () => {
     });
 
     it('sends JSON body for POST requests', async () => {
-      const payload = { buyerId: 'user1', items: [] };
+      const payload = { items: [] };
       mockFetchResponse(200, payload);
 
       await apiRequest('POST', '/api/basket', { body: payload });

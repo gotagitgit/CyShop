@@ -1,7 +1,7 @@
-namespace Basket.API.Models;
+namespace Basket.Domain.Entities;
 
 public sealed record CustomerBasket
 {
-    public string BuyerId { get; init; } = string.Empty;
+    public Guid BuyerId { get; init; }
     public List<BasketItem> Items { get; init; } = [];
 }

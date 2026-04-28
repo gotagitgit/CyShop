@@ -11,12 +11,6 @@ grant_type=password&client_id=cyshop-web&username=user&password=Pass123$
 
 @token = <paste-access_token-from-above>
 
-### Get basket (anonymous - returns empty basket)
-GET {{Basket.API_HostAddress}}/api/basket
-Accept: application/json
-
-###
-
 ### Get basket (authenticated)
 GET {{Basket.API_HostAddress}}/api/basket
 Accept: application/json
@@ -30,13 +24,12 @@ Content-Type: application/json
 Authorization: Bearer {{token}}
 
 {
-  "buyerId": "",
   "items": [
     {
-      "id": "1",
-      "productId": 1,
+      "productId": "00000000-0000-0000-0000-000000000001",
       "productName": "Sample Product",
       "unitPrice": 19.99,
+      "oldUnitPrice": 19.99,
       "quantity": 2,
       "pictureUrl": "https://example.com/product.png"
     }

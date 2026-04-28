@@ -8,6 +8,5 @@ export interface BasketItem {
 }
 
 export interface CustomerBasket {
-  buyerId: string;
   items: BasketItem[];
 }

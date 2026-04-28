@@ -1,7 +1,8 @@
 using Basket.API.Endpoints;
 using Basket.API.IntegrationEvents.EventHandling;
 using Basket.API.IntegrationEvents.Events;
-using Basket.API.Repositories;
+using Basket.Application;
+using Basket.Infrastructure;
 using CyShop.ServiceDefaults;
 using EventBus.Abstractions;
 using RabbitMQEventBus;
@@ -16,10 +17,12 @@ builder.Services.AddOpenApi();
 // Register Redis connection via Aspire
 builder.AddRedisClient("basketcache");
 
-// Register basket repository
-builder.Services.AddScoped<IBasketRepository, RedisBasketRepository>();
+// Register application and infrastructure services
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices();
 
 builder.AddDefaultAuthentication();
+builder.Services.AddCurrentUser();
 
 builder.AddDefaultCors();
 
@@ -41,6 +44,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseCurrentUser();
 
 app.MapBasketEndpoints();
 
