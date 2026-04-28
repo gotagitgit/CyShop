@@ -1,6 +1,9 @@
 <Solution>
   <Folder Name="/Basket/">
-    <Project Path="src/Basket.API/Basket.API.csproj" />
+    <Project Path="src/Basket/Basket.Domain/Basket.Domain.csproj" />
+    <Project Path="src/Basket/Basket.Application/Basket.Application.csproj" />
+    <Project Path="src/Basket/Basket.Infrastructure/Basket.Infrastructure.csproj" />
+    <Project Path="src/Basket/Basket.API/Basket.API.csproj" />
   </Folder>
   <Folder Name="/Catalogs/">
     <Project Path="src/Catalogs/Catalog.API/Catalog.API.csproj" />

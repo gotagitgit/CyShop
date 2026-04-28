@@ -1,17 +1,18 @@
 using System.Text.Json;
-using Basket.API.Models;
+using Basket.Domain.Entities;
+using Basket.Domain.Interfaces;
 using StackExchange.Redis;
 
-namespace Basket.API.Repositories;
+namespace Basket.Infrastructure.Repositories;
 
 public sealed class RedisBasketRepository(IConnectionMultiplexer redis) : IBasketRepository
 {
     private const string KeyPrefix = "basket:";
     private readonly IDatabase _database = redis.GetDatabase();
 
-    private static string Key(string buyerId) => $"{KeyPrefix}{buyerId}";
+    private static string Key(Guid buyerId) => $"{KeyPrefix}{buyerId}";
 
-    public async Task<CustomerBasket?> GetBasketAsync(string buyerId)
+    public async Task<CustomerBasket?> GetBasketAsync(Guid buyerId)
     {
         var data = await _database.StringGetAsync(Key(buyerId));
 
@@ -36,7 +37,7 @@ public sealed class RedisBasketRepository(IConnectionMultiplexer redis) : IBaske
         return await GetBasketAsync(basket.BuyerId);
     }
 
-    public async Task<bool> DeleteBasketAsync(string buyerId)
+    public async Task<bool> DeleteBasketAsync(Guid buyerId)
     {
         return await _database.KeyDeleteAsync(Key(buyerId));
     }

@@ -1,4 +1,4 @@
-namespace Basket.API.Models;
+namespace Basket.Domain.Entities;
 
 public sealed record BasketItem
 {

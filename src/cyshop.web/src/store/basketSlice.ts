@@ -76,7 +76,7 @@ const basketSlice = createSlice({
   reducers: {
     addItem(state, action: PayloadAction<BasketItem>) {
       if (!state.basket) {
-        state.basket = { buyerId: '', items: [action.payload] };
+        state.basket = { items: [action.payload] };
         return;
       }
       const existing = state.basket.items.find(
