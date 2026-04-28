@@ -10,6 +10,7 @@ builder.AddServiceDefaults();
 builder.Services.AddOpenApi();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddCurrentUser();
 
 builder.AddDefaultCors();
 
@@ -31,6 +32,7 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseCurrentUser();
 
 app.MapCatalogEndpoints();
 

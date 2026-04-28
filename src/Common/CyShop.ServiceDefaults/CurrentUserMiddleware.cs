@@ -1,11 +1,12 @@
 using CyShop.ServiceDefaults.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 
 namespace CyShop.ServiceDefaults;
 
 public class CurrentUserMiddleware(RequestDelegate next)
 {
-    public Task InvokeAsync(HttpContext context, CurrentUser currentUser)
+    public Task InvokeAsync(HttpContext context, CurrentUser currentUser, IConfiguration configuration)
     {
         var endpoint = context.GetEndpoint();
 
@@ -21,7 +22,7 @@ public class CurrentUserMiddleware(RequestDelegate next)
             return next(context);
         }
 
-        var externalId = user.ResolveExternalId(context);
+        var externalId = user.ResolveExternalId(context, configuration);
         if (externalId is null)
         {
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;

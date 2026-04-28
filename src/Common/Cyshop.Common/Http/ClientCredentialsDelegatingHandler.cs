@@ -2,13 +2,17 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
+using Cyshop.Common.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace CyShop.DbMigrator;
+namespace CyShop.Common.Http;
 
 public sealed class ClientCredentialsDelegatingHandler(
     IConfiguration configuration,
+    IHttpContextAccessor httpContextAccessor,
     ILogger<ClientCredentialsDelegatingHandler> logger) : DelegatingHandler
 {
     private string? _cachedToken;
@@ -21,6 +25,14 @@ public sealed class ClientCredentialsDelegatingHandler(
             _cachedToken = await ObtainTokenAsync(cancellationToken);
 
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _cachedToken);
+
+        // Optionally forward user identity for service-to-service calls
+        var currentUser = httpContextAccessor.HttpContext?.RequestServices.GetService<ICurrentUser>();
+        if (currentUser is { IsResolved: true })
+        {
+            request.Headers.Remove("X-On-Behalf-Of");
+            request.Headers.Add("X-On-Behalf-Of", currentUser.UserId.ToString());
+        }
 
         var response = await base.SendAsync(request, cancellationToken);
 

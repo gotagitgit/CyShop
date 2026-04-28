@@ -39,7 +39,7 @@ export default function ProductCard({ item }: ProductCardProps) {
             : i,
         )
       : [...currentItems, newItem];
-    dispatch(saveBasket({ buyerId: basket?.buyerId ?? '', items: updatedItems }));
+    dispatch(saveBasket({ items: updatedItems }));
   };
 
   return (

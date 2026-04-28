@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import { useAuthStatus } from '../auth/useAuthStatus';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { sendMessage } from '../store/chatSlice';
+import { fetchBasket } from '../store/basketSlice';
 
 export default function ChatWidget() {
   const { isAuthenticated } = useAuthStatus();
@@ -12,10 +13,21 @@ export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const prevMessagesLengthRef = useRef(messages.length);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
+
+  useEffect(() => {
+    if (
+      messages.length > prevMessagesLengthRef.current &&
+      messages[messages.length - 1]?.role === 'assistant'
+    ) {
+      dispatch(fetchBasket());
+    }
+    prevMessagesLengthRef.current = messages.length;
+  }, [messages, dispatch]);
 
   if (!isAuthenticated) return null;
 

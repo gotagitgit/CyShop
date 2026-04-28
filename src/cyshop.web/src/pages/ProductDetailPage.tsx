@@ -72,7 +72,7 @@ export default function ProductDetailPage() {
             : i,
         )
       : [...currentItems, newItem];
-    dispatch(saveBasket({ buyerId: basket?.buyerId ?? '', items: updatedItems }));
+    dispatch(saveBasket({ items: updatedItems }));
   };
 
   if (status === 'loading') {

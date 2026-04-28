@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Chat.Application\Chat.Application.csproj" />
     <ProjectReference Include="..\..\Search\SearchServices\SearchServices.csproj" />
+    <ProjectReference Include="..\..\Common\Cyshop.Common\Cyshop.Common.csproj" />
   </ItemGroup>
 
   <ItemGroup>

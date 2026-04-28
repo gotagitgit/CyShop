@@ -57,6 +57,14 @@ services:
     volumes:
       - minio-data:/data
   
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: redisinsight
+    ports:
+      - "5540:5540"
+    volumes:
+      - redisinsight-data:/data
+
   cyShop-opensearch:
     image: opensearchproject/opensearch:2.17.1
     container_name: cyShop-opensearch
@@ -98,3 +106,4 @@ volumes:
   rabbitmq-data:
   minio-data:
   opensearch-data:
+  redisinsight-data:

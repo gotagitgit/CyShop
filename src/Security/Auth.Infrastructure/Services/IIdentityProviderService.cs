@@ -10,4 +10,6 @@ public interface IIdentityProviderService
     Task DeleteRealmAsync(string realmName);
     Task CreateUserAsync(string realmName, CreateUserDto user, CancellationToken cancellationToken);
     Task<UserDto?> FindUserAsync(string realmName, string username, CancellationToken cancellationToken);
+    Task CreateClientScopeAsync(string realmName, string scopeName, CancellationToken cancellationToken);
+    Task AssignClientScopesAsync(string realmName, string clientId, string[] scopeNames, CancellationToken cancellationToken);
 }

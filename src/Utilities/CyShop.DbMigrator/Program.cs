@@ -1,15 +1,21 @@
+using Auth.Infrastructure;
 using Catalog.Infrastructure;
 using Customers.Infrastructure;
+using Cyshop.Common.Models;
+using CyShop.Common.Http;
 using CyShop.DbMigrator;
+using CyShop.DbMigrator.Models;
+using CyShop.ServiceDefaults;
+using CyShop.ServiceDefaults.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Auth.Infrastructure;
-using Storage.Infrastructure;
 using Orders.Infrastructure;
 using SearchServices;
 using SearchServices.Settings;
 using StackExchange.Redis;
+using Storage.Infrastructure;
 
 var options = CommandLineOptions.Parse(args);
 
@@ -39,11 +45,18 @@ services.AddScoped<AuthSeeder>();
 services.AddSingleton<StorageSeeder>();
 services.AddHttpClient<OpenSearchSeeder>();
 services.AddScoped<OpenSearchModelSetup>();
+services.AddSingleton<DevUser>();
+services.AddSingleton<ICurrentUser>(sp => sp.GetRequiredService<DevUser>());
 
 var redisConnectionString = configuration.GetConnectionString("Redis") ?? "localhost:6379";
 services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect($"{redisConnectionString},allowAdmin=true"));
 
-services.AddTransient<ClientCredentialsDelegatingHandler>();
+services.AddSingleton<IHttpContextAccessor>(sp =>
+{
+    var context = new DefaultHttpContext { RequestServices = sp };
+    return new ScopedHttpContextAccessor(context);
+});
+services.AddScoped<ClientCredentialsDelegatingHandler>();
 services.AddHttpClient<CatalogApiSeeder>()
     .AddHttpMessageHandler<ClientCredentialsDelegatingHandler>();
 services.AddHttpClient<CustomerApiSeeder>()
@@ -53,3 +66,13 @@ await using var provider = services.BuildServiceProvider();
 using var scope = provider.CreateScope();
 var runner = scope.ServiceProvider.GetRequiredService<MigrationRunner>();
 await runner.RunAllAsync();
+
+/// <summary>
+/// IHttpContextAccessor for non-web hosts that exposes the IServiceProvider
+/// via a minimal HttpContext, so that DelegatingHandlers can resolve services
+/// (e.g. ICurrentUser → DevUser) the same way they do in web hosts.
+/// </summary>
+internal sealed class ScopedHttpContextAccessor(HttpContext context) : IHttpContextAccessor
+{
+    public HttpContext? HttpContext { get; set; } = context;
+}
