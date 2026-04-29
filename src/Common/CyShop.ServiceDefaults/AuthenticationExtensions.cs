@@ -101,17 +101,21 @@ public static class AuthenticationExtensions
         return builder.Services;
     }
 
-    public static Guid? ResolveExternalId(this ClaimsPrincipal user, HttpContext httpContext)
+    public static Guid? ResolveExternalId(this ClaimsPrincipal user, HttpContext httpContext, IConfiguration configuration)
     {
+        // Service-to-service calls: trust X-On-Behalf-Of when the token carries the service scope
+        var serviceScope = configuration["Identity:ServiceScope"];
+        if (!string.IsNullOrEmpty(serviceScope)
+            && user.HasClaim(c => c.Type == "scope" && c.Value.Contains(serviceScope))
+            && httpContext.Request.Headers.TryGetValue("X-On-Behalf-Of", out var onBehalf)
+            && Guid.TryParse(onBehalf.FirstOrDefault(), out var fromHeader))
+            return fromHeader;
+
+        // Direct user calls: resolve from the "sub" claim
         var sub = user.FindFirstValue("sub");
 
         if (!string.IsNullOrEmpty(sub) && Guid.TryParse(sub, out var fromSub))
             return fromSub;
-
-        if (user.HasClaim(c => c.Type == "scope" && c.Value.Contains("customers.api"))
-            && httpContext.Request.Headers.TryGetValue("X-On-Behalf-Of", out var onBehalf)
-            && Guid.TryParse(onBehalf.FirstOrDefault(), out var fromHeader))
-            return fromHeader;
 
         return null;
     }

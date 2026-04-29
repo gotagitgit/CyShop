@@ -14,6 +14,8 @@ builder.Services.AddSearchServices();
 
 builder.AddDefaultCors();
 builder.AddDefaultAuthentication();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddCurrentUser();
 
 var app = builder.Build();
 
@@ -22,5 +24,6 @@ app.UseCors();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseCurrentUser();
 app.MapChatEndpoints();
 app.Run();

@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Customers.Application.DTOs;
 using Customers.Application.Interfaces;
 using CyShop.ServiceDefaults;
+using Microsoft.Extensions.Configuration;
 
 namespace Customers.API.Endpoints;
 
@@ -11,9 +12,9 @@ public static class CustomerEndpoints
     {
         var group = app.MapGroup("/api/customers").RequireAuthorization();
 
-        group.MapGet("/addresses", async (HttpContext httpContext, ClaimsPrincipal user, ICustomerAddressService addressService, CancellationToken ct) =>
+        group.MapGet("/addresses", async (HttpContext httpContext, ClaimsPrincipal user, IConfiguration configuration, ICustomerAddressService addressService, CancellationToken ct) =>
         {
-            var externalId = user.ResolveExternalId(httpContext);
+            var externalId = user.ResolveExternalId(httpContext, configuration);
 
             if (externalId is null)
             {
@@ -24,9 +25,9 @@ public static class CustomerEndpoints
             return Results.Ok(addresses);
         });
 
-        group.MapGet("/profile", async (HttpContext httpContext, ClaimsPrincipal user, ICustomerService customerService, CancellationToken ct) =>
+        group.MapGet("/profile", async (HttpContext httpContext, ClaimsPrincipal user, IConfiguration configuration, ICustomerService customerService, CancellationToken ct) =>
         {
-            var externalId = user.ResolveExternalId(httpContext);
+            var externalId = user.ResolveExternalId(httpContext, configuration);
 
             if (externalId is null)
             {
@@ -43,9 +44,9 @@ public static class CustomerEndpoints
             return Results.Ok(customer);
         });
 
-        group.MapPost("/profile", async (HttpContext httpContext, ClaimsPrincipal user, CreateCustomerDto dto, ICustomerService customerService, CancellationToken ct) =>
+        group.MapPost("/profile", async (HttpContext httpContext, ClaimsPrincipal user, IConfiguration configuration, CreateCustomerDto dto, ICustomerService customerService, CancellationToken ct) =>
         {
-            var externalId = user.ResolveExternalId(httpContext);
+            var externalId = user.ResolveExternalId(httpContext, configuration);
 
             if (externalId is null)
             {
@@ -67,9 +68,9 @@ public static class CustomerEndpoints
             }
         });
 
-        group.MapPut("/profile", async (HttpContext httpContext, ClaimsPrincipal user, UpdateCustomerDto dto, ICustomerService customerService, CancellationToken ct) =>
+        group.MapPut("/profile", async (HttpContext httpContext, ClaimsPrincipal user, IConfiguration configuration, UpdateCustomerDto dto, ICustomerService customerService, CancellationToken ct) =>
         {
-            var externalId = user.ResolveExternalId(httpContext);
+            var externalId = user.ResolveExternalId(httpContext, configuration);
 
             if (externalId is null)
             {
@@ -91,9 +92,9 @@ public static class CustomerEndpoints
             }
         });
 
-        group.MapDelete("/profile", async (HttpContext httpContext, ClaimsPrincipal user, ICustomerService customerService, CancellationToken ct) =>
+        group.MapDelete("/profile", async (HttpContext httpContext, ClaimsPrincipal user, IConfiguration configuration, ICustomerService customerService, CancellationToken ct) =>
         {
-            var externalId = user.ResolveExternalId(httpContext);
+            var externalId = user.ResolveExternalId(httpContext, configuration);
 
             if (externalId is null)
             {
@@ -110,9 +111,9 @@ public static class CustomerEndpoints
             return Results.NoContent();
         });
 
-        group.MapPost("/addresses", async (HttpContext httpContext, ClaimsPrincipal user, CreateAddressDto dto, ICustomerAddressService addressService, CancellationToken ct) =>
+        group.MapPost("/addresses", async (HttpContext httpContext, ClaimsPrincipal user, IConfiguration configuration, CreateAddressDto dto, ICustomerAddressService addressService, CancellationToken ct) =>
         {
-            var externalId = user.ResolveExternalId(httpContext);
+            var externalId = user.ResolveExternalId(httpContext, configuration);
 
             if (externalId is null)
             {
@@ -134,9 +135,9 @@ public static class CustomerEndpoints
             }
         });
 
-        group.MapPut("/addresses/{addressId}", async (Guid addressId, HttpContext httpContext, ClaimsPrincipal user, UpdateAddressDto dto, ICustomerAddressService addressService, CancellationToken ct) =>
+        group.MapPut("/addresses/{addressId}", async (Guid addressId, HttpContext httpContext, ClaimsPrincipal user, IConfiguration configuration, UpdateAddressDto dto, ICustomerAddressService addressService, CancellationToken ct) =>
         {
-            var externalId = user.ResolveExternalId(httpContext);
+            var externalId = user.ResolveExternalId(httpContext, configuration);
 
             if (externalId is null)
             {
@@ -158,9 +159,9 @@ public static class CustomerEndpoints
             }
         });
 
-        group.MapDelete("/addresses/{addressId}", async (Guid addressId, HttpContext httpContext, ClaimsPrincipal user, ICustomerAddressService addressService, CancellationToken ct) =>
+        group.MapDelete("/addresses/{addressId}", async (Guid addressId, HttpContext httpContext, ClaimsPrincipal user, IConfiguration configuration, ICustomerAddressService addressService, CancellationToken ct) =>
         {
-            var externalId = user.ResolveExternalId(httpContext);
+            var externalId = user.ResolveExternalId(httpContext, configuration);
 
             if (externalId is null)
             {

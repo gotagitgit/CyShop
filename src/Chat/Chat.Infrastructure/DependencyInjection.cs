@@ -1,9 +1,13 @@
 using Chat.Domain.Interfaces;
-using Chat.Infrastructure.Tools;
+using Chat.Infrastructure.Factory;
 using Chat.Infrastructure.Services;
+using Chat.Infrastructure.Tools;
+using CyShop.Common.Http;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using SearchServices;
 using SearchServices.Settings;
 
@@ -16,34 +20,49 @@ public static class DependencyInjection
     {
         var services = builder.Services;
         var config = builder.Configuration;
-
-        // Chat settings
-        var chatSection = config.GetSection("Chat");
+        
+        var chatSection = config.GetSection(nameof(ChatSettings));
         services.Configure<ChatSettings>(chatSection);
+        services.Configure<SearchSettings>(config.GetSection(nameof(SearchSettings)))
+                .AddSearchServices();
 
-        // OpenSearch services from SearchServices library
-        services.Configure<SearchSettings>(config.GetSection("Search"));
-        services.AddSearchServices();
+        RegisterHttpClients(services, config);
+        RegisterChatClient(services);
+        RegisterChatTools(services);
 
-        // Ollama IChatClient — singleton, stateless HTTP client wrapper
-        var timeoutSeconds = int.TryParse(chatSection["TimeoutSeconds"], out var t) ? t : 120;
-        var ollamaEndpoint = chatSection["OllamaEndpoint"] ?? "http://localhost:11434";
-        var ollamaModel = chatSection["ModelName"] ?? "qwen3.5:9b";
-
-        var httpClient = new HttpClient
-        {
-            BaseAddress = new Uri(ollamaEndpoint),
-            Timeout = TimeSpan.FromSeconds(timeoutSeconds)
-        };
-        services.AddSingleton<IChatClient>(new OllamaSharp.OllamaApiClient(httpClient, ollamaModel));
-
-        // Chat tools — add new IChatTool implementations here for future capabilities
-        services.AddScoped<IChatTool, SearchCatalogTool>();
-        // services.AddScoped<IChatTool, AddToCartTool>();
-
-        // Domain port: IChatCompletionService → OllamaChatCompletionService (scoped — one per request)
+        services.AddScoped<IChatHttpClientFactory, ChatHttpClientFactory>();
         services.AddScoped<IChatCompletionService, OllamaChatCompletionService>();
 
         return services;
+    }
+
+    private static void RegisterHttpClients(IServiceCollection services, IConfigurationManager config)
+    {
+        services.AddScoped<ClientCredentialsDelegatingHandler>();
+        services.AddHttpClient(ChatHttpClientFactory.BasketApiClientName, client =>
+        {
+            client.BaseAddress = new Uri(config["ApiEndpoints:BasketApi"] ?? "http://localhost:5167");
+        }).AddHttpMessageHandler<ClientCredentialsDelegatingHandler>();
+    }
+
+    private static void RegisterChatTools(IServiceCollection services)
+    {
+        services.AddScoped<IChatTool, AddToBasketTool>();
+        services.AddScoped<IChatTool, SearchCatalogTool>();
+    }
+
+    private static void RegisterChatClient(IServiceCollection services)
+    {
+        services.AddSingleton<IChatClient>(sp =>
+        {
+            var settings = sp.GetRequiredService<IOptions<ChatSettings>>().Value;
+            var httpClient = new HttpClient
+            {
+                BaseAddress = new Uri(settings.OllamaEndpoint),
+                Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds)
+            };
+
+            return new OllamaSharp.OllamaApiClient(httpClient, settings.ModelName);
+        });
     }
 }

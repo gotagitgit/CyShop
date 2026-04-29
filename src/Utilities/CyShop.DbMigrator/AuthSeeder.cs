@@ -5,6 +5,7 @@ using Auth.Infrastructure.Dtos;
 using Auth.Infrastructure.Extensions;
 using Customers.Domain.Interfaces;
 using Customers.Domain.Entities;
+using CyShop.DbMigrator.Models;
 
 namespace CyShop.DbMigrator;
 
@@ -12,6 +13,7 @@ public sealed class AuthSeeder(
     IConfiguration configuration,
     IIdentityProviderService identityProviderService,
     ICustomerRepository customerRepository,
+    DevUser devUser,
     ILogger<AuthSeeder> logger)
 {
     public async Task SeedAsync(CancellationToken cancellationToken)
@@ -25,6 +27,13 @@ public sealed class AuthSeeder(
         var clientSecret = configuration["Keycloak:ServiceClientSecret"] ?? "service-secret";
         var serviceClient = new CreateClientDto().CreateConfidential("cyshop-service", clientSecret);
         await identityProviderService.CreateClientAsync(realmName, serviceClient, cancellationToken);
+
+        var apiScopes = new[] { "basket.api", "catalog.api", "customers.api" };
+        foreach (var scope in apiScopes)
+        {
+            await identityProviderService.CreateClientScopeAsync(realmName, scope, cancellationToken);
+        }
+        await identityProviderService.AssignClientScopesAsync(realmName, "cyshop-service", apiScopes, cancellationToken);
 
         var users = await GetCustomersAsync(cancellationToken);
 
@@ -43,6 +52,8 @@ public sealed class AuthSeeder(
         }
 
         await UpdateCustomerAsync([.. createdUsers], users, cancellationToken);
+
+        devUser.Set(createdUsers[0].Id);
     }
 
     private async Task UpdateCustomerAsync(

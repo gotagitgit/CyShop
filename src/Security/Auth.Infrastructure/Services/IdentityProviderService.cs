@@ -90,4 +90,55 @@ internal sealed class IdentityProviderService : IIdentityProviderService
 
         return _userFactory.Create(user.First());
     }
+
+    public async Task CreateClientScopeAsync(string realmName, string scopeName, CancellationToken cancellationToken)
+    {
+        var existingScopes = await _keycloakAdminClient.GetClientScopesAsync(realmName, cancellationToken);
+
+        var alreadyExists = existingScopes.Any(s =>
+            s.TryGetProperty("name", out var name) && name.GetString() == scopeName);
+
+        if (alreadyExists)
+        {
+            _logger.LogInformation("Client scope '{ScopeName}' already exists in realm '{Realm}'.", scopeName, realmName);
+            return;
+        }
+
+        await _keycloakAdminClient.CreateClientScopeAsync(realmName, scopeName, cancellationToken);
+        _logger.LogInformation("Client scope '{ScopeName}' created in realm '{Realm}'.", scopeName, realmName);
+    }
+
+    public async Task AssignClientScopesAsync(string realmName, string clientId, string[] scopeNames, CancellationToken cancellationToken)
+    {
+        // Look up the client's internal ID
+        var clients = await _keycloakAdminClient.GetClientsByClientIdAsync(realmName, clientId, cancellationToken);
+
+        if (clients is not { Length: > 0 })
+        {
+            _logger.LogWarning("Client '{ClientId}' not found in realm '{Realm}'. Cannot assign scopes.", clientId, realmName);
+            return;
+        }
+
+        var clientInternalId = clients[0].GetProperty("id").GetString()!;
+
+        // Get all client scopes to resolve scope names to IDs
+        var allScopes = await _keycloakAdminClient.GetClientScopesAsync(realmName, cancellationToken);
+
+        foreach (var scopeName in scopeNames)
+        {
+            var scope = allScopes.FirstOrDefault(s =>
+                s.TryGetProperty("name", out var name) && name.GetString() == scopeName);
+
+            if (scope.ValueKind == System.Text.Json.JsonValueKind.Undefined)
+            {
+                _logger.LogWarning("Client scope '{ScopeName}' not found in realm '{Realm}'. Skipping assignment.", scopeName, realmName);
+                continue;
+            }
+
+            var scopeId = scope.GetProperty("id").GetString()!;
+
+            await _keycloakAdminClient.AddDefaultClientScopeAsync(realmName, clientInternalId, scopeId, cancellationToken);
+            _logger.LogInformation("Assigned scope '{ScopeName}' to client '{ClientId}' in realm '{Realm}'.", scopeName, clientId, realmName);
+        }
+    }
 }

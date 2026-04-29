@@ -34,4 +34,16 @@ public interface IKeycloakAdminClient
 
     Task UpdateClientAsync<T>(
         string realmName, string id, T clientRepresentation, CancellationToken ct = default);
+
+    Task<JsonElement[]> GetClientScopesAsync(
+        string realmName, CancellationToken ct = default);
+
+    Task CreateClientScopeAsync(
+        string realmName, string scopeName, CancellationToken ct = default);
+
+    Task<UserRepresentation> GetServiceAccountUserAsync(
+        string realmName, string clientInternalId, CancellationToken ct = default);
+
+    Task AddDefaultClientScopeAsync(
+        string realmName, string clientInternalId, string scopeId, CancellationToken ct = default);
 }
