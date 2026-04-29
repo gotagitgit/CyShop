@@ -11,6 +11,11 @@ services:
       - "5432:5432"
     volumes:
       - cyShopDB-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:8.2
@@ -19,14 +24,40 @@ services:
       - "6379:6379"
     volumes:
       - basketcache-data:/data
+  
+  keycloak-db-init:
+    image: postgres:17.6
+    container_name: keycloak-db-init
+    depends_on:
+      cyShopDB:
+        condition: service_healthy
+    environment:
+      PGHOST: cyShopDB
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    entrypoint: >
+      bash -c "psql -tc \"SELECT 1 FROM pg_database WHERE datname = 'keycloak'\" | grep -q 1 || psql -c 'CREATE DATABASE keycloak;'"
+    restart: "no"
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.2
     container_name: keycloak
     command: start-dev
+    depends_on:
+      keycloak-db-init:
+        condition: service_completed_successfully
+    restart: always
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HEALTH_ENABLED: true
+      KC_DB: postgres
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KC_DB_SCHEMA: public
+      KC_DB_URL_HOST: cyShopDB
+      KC_DB_URL_PORT: 5432
+      KC_DB_URL_DATABASE: keycloak
     ports:
       - "8080:8080"
     volumes:
