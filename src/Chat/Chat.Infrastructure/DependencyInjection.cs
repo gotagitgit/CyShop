@@ -1,13 +1,12 @@
 using Chat.Domain.Interfaces;
 using Chat.Infrastructure.Factory;
+using Chat.Infrastructure.Factory.ChatClient;
 using Chat.Infrastructure.Services;
 using Chat.Infrastructure.Tools;
 using CyShop.Common.Http;
-using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using SearchServices;
 using SearchServices.Settings;
 
@@ -20,20 +19,26 @@ public static class DependencyInjection
     {
         var services = builder.Services;
         var config = builder.Configuration;
-        
-        var chatSection = config.GetSection(nameof(ChatSettings));
-        services.Configure<ChatSettings>(chatSection);
+
+        services.Configure<ChatSettings>(config.GetSection(nameof(ChatSettings)));
         services.Configure<SearchSettings>(config.GetSection(nameof(SearchSettings)))
                 .AddSearchServices();
 
         RegisterHttpClients(services, config);
-        RegisterChatClient(services);
         RegisterChatTools(services);
+        RegisterFactories(services);
 
-        services.AddScoped<IChatHttpClientFactory, ChatHttpClientFactory>();
-        services.AddScoped<IChatCompletionService, OllamaChatCompletionService>();
+        services.AddScoped<IChatCompletionService, ChatCompletionService>();
 
         return services;
+    }
+
+    private static void RegisterFactories(IServiceCollection services)
+    {
+        services.AddScoped<IChatHttpClientFactory, ChatHttpClientFactory>();
+        services.AddScoped<IChatAPIClientFactory, OpenAIChatClientFactory>();
+        services.AddScoped<IChatAPIClientFactory, OllamaChatClientFactory>();
+        services.AddScoped<IChatClientFactory, ChatClientFactory>();
     }
 
     private static void RegisterHttpClients(IServiceCollection services, IConfigurationManager config)
@@ -49,20 +54,5 @@ public static class DependencyInjection
     {
         services.AddScoped<IChatTool, AddToBasketTool>();
         services.AddScoped<IChatTool, SearchCatalogTool>();
-    }
-
-    private static void RegisterChatClient(IServiceCollection services)
-    {
-        services.AddSingleton<IChatClient>(sp =>
-        {
-            var settings = sp.GetRequiredService<IOptions<ChatSettings>>().Value;
-            var httpClient = new HttpClient
-            {
-                BaseAddress = new Uri(settings.OllamaEndpoint),
-                Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds)
-            };
-
-            return new OllamaSharp.OllamaApiClient(httpClient, settings.ModelName);
-        });
     }
 }
