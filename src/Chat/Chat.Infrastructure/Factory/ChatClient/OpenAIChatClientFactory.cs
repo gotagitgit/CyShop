@@ -18,7 +18,10 @@ internal sealed class OpenAIChatClientFactory(
     {
         var settings = options.Value;
 
-        var handler = new ChatHttpHandler(loggerFactory);
+        var handler = new ChatHttpHandler(loggerFactory)
+        {
+            InnerHandler = new HttpClientHandler()
+        };
         var httpClient = new HttpClient(handler)
         {
             Timeout = TimeSpan.FromSeconds(settings.TimeoutSeconds)
