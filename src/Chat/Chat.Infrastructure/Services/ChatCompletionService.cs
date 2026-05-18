@@ -1,19 +1,19 @@
-using Chat.Domain.Interfaces;
+﻿using Chat.Domain.Interfaces;
+using Chat.Infrastructure.Factory.ChatClient;
 using Chat.Infrastructure.Tools;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
 using ChatRole = Microsoft.Extensions.AI.ChatRole;
 using DomainChatMessage = Chat.Domain.Entities.ChatMessage;
 
 namespace Chat.Infrastructure.Services;
 
-public class OllamaChatCompletionService : IChatCompletionService
+internal class ChatCompletionService : IChatCompletionService
 {
     private readonly IChatClient _chatClient;
     private readonly IEnumerable<IChatTool> _tools;
-    private readonly ILogger<OllamaChatCompletionService> _logger;
+    private readonly ILogger<ChatCompletionService> _logger;
 
     private const string SystemPrompt = """
         You are a shopping assistant for CyShop, an online store that sells clothing and equipment for outdoor activities.
@@ -27,14 +27,15 @@ public class OllamaChatCompletionService : IChatCompletionService
         - If someone asks about something unrelated to CyShop, politely redirect them.
         """;
 
-    public OllamaChatCompletionService(
-        IChatClient chatClient,
+    public ChatCompletionService(
+        IChatClientFactory chatClientFactory,
         IEnumerable<IChatTool> tools,
-        ILogger<OllamaChatCompletionService> logger,
-        IOptions<ChatSettings> settings)
+        ILogger<ChatCompletionService> logger)
     {
         _tools = tools;
         _logger = logger;
+
+        var chatClient = chatClientFactory.Create();
 
         _chatClient = new ChatClientBuilder(chatClient)
             .UseFunctionInvocation()
