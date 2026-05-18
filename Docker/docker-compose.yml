@@ -46,7 +46,6 @@ services:
     depends_on:
       keycloak-db-init:
         condition: service_completed_successfully
-    restart: always
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
